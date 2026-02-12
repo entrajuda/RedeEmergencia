@@ -1,0 +1,177 @@
+@model REA.Emergencia.Web.Models.PedidoBemInputModel
+
+@{
+    ViewData["Title"] = "Preciso de Receber Apoio em Bens não Alimentares";
+}
+
+<div class="row">
+    <div class="col-lg-10 col-xl-9">
+        <h1 class="mb-3">@ViewData["Title"]</h1>
+
+        <p>
+            A Rede de Emergência Solidária pretende dar resposta à situação de emergência causada pelas tempestades. Visa permitir levar bens não alimentares e equipamentos a quem deles carece e assim apoiar quem está numa situação de necessidade.
+        </p>
+        <p>
+            Foi estruturada pela ENTRAJUDA, em articulação com a Federação Portuguesa dos Bancos Alimentares, assente nas Instituições de Solidariedade Social, nas Juntas de Freguesia e outras entidades que prestam apoio.
+        </p>
+        <p>
+            Se precisa de apoio alimentar, por favor, preencha o formulário disponível em
+            <a href="https://formspedido.rededeemergencia.pt/" target="_blank" rel="noreferrer">https://formspedido.rededeemergencia.pt/</a>.
+        </p>
+
+        <hr />
+
+        <form asp-action="ApoioBens" method="post" novalidate>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label">1. O seu nome</label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PhoneNumber" class="form-label">2. O seu número de telemóvel</label>
+                <input asp-for="PhoneNumber" class="form-control" inputmode="tel" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">3. O seu endereço de email</label>
+                <input asp-for="Email" class="form-control" type="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Address" class="form-label">4. A sua morada</label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PostalCode" class="form-label">5. Código Postal</label>
+                <input asp-for="PostalCode" class="form-control" placeholder="0000-000" inputmode="numeric" />
+                <span asp-validation-for="PostalCode" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Localidade" class="form-label">6. Localidade</label>
+                <input asp-for="Localidade" class="form-control" />
+                <span asp-validation-for="Localidade" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Freguesia" class="form-label">7. Freguesia</label>
+                <input asp-for="Freguesia" class="form-control" />
+                <span asp-validation-for="Freguesia" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Concelho" class="form-label">8. Concelho</label>
+                <input asp-for="Concelho" class="form-control" />
+                <span asp-validation-for="Concelho" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="IdentificationNumber" class="form-label">
+                    9. O seu Nº de Identificação (NISS, NIF, Cartão de Cidadão, Bilhete de Identidade, Título de Residência ou Passaporte)
+                </label>
+                <input asp-for="IdentificationNumber" class="form-control" />
+                <span asp-validation-for="IdentificationNumber" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Age" class="form-label">10. Indique a sua idade</label>
+                <input asp-for="Age" class="form-control" type="number" min="0" max="120" />
+                <span asp-validation-for="Age" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="HouseholdSize" class="form-label">11. Quantas pessoas habitam em sua casa, contando consigo</label>
+                <input asp-for="HouseholdSize" class="form-control" type="number" min="1" max="50" />
+                <span asp-validation-for="HouseholdSize" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ChildrenUnder12" class="form-label">12. Quantas crianças com menos de 12 anos vivem consigo?</label>
+                <input asp-for="ChildrenUnder12" class="form-control" type="number" min="0" max="50" />
+                <span asp-validation-for="ChildrenUnder12" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Youth13To17" class="form-label">13. Quantos jovens entre 13 e 17 anos vivem consigo?</label>
+                <input asp-for="Youth13To17" class="form-control" type="number" min="0" max="50" />
+                <span asp-validation-for="Youth13To17" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Adults18Plus" class="form-label">14. Quantas pessoas maiores de 18 anos vivem consigo?</label>
+                <input asp-for="Adults18Plus" class="form-control" type="number" min="0" max="50" />
+                <span asp-validation-for="Adults18Plus" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Seniors65Plus" class="form-label">15. E com mais de 65 anos?</label>
+                <input asp-for="Seniors65Plus" class="form-control" type="number" min="0" max="50" />
+                <span asp-validation-for="Seniors65Plus" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">16. Costuma ser apoiado com alimentos por uma Instituição social</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="ReceivesFoodSupport" value="true" id="receivesFoodSupportYes" />
+                    <label class="form-check-label" for="receivesFoodSupportYes">Sim</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="ReceivesFoodSupport" value="false" id="receivesFoodSupportNo" />
+                    <label class="form-check-label" for="receivesFoodSupportNo">Não</label>
+                </div>
+                <span asp-validation-for="ReceivesFoodSupport" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FoodSupportInstitutionName" class="form-label">17. Se SIM, por favor, indique o nome da Instituição</label>
+                <input asp-for="FoodSupportInstitutionName" class="form-control" />
+                <span asp-validation-for="FoodSupportInstitutionName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">18. Tem possibilidade de ir buscar os produtos a um local perto de sua casa</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="CanPickUpNearby" value="true" id="canPickUpYes" />
+                    <label class="form-check-label" for="canPickUpYes">Sim</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="CanPickUpNearby" value="false" id="canPickUpNo" />
+                    <label class="form-check-label" for="canPickUpNo">Não</label>
+                </div>
+                <span asp-validation-for="CanPickUpNearby" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Suggestions" class="form-label">19. Sugestões que entenda partilhar</label>
+                <textarea asp-for="Suggestions" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Suggestions" class="text-danger"></span>
+            </div>
+
+            <div class="alert alert-secondary">
+                <p class="mb-2">
+                    Mediante o preenchimento e envio do presente formulário pode fazer-nos chegar informação que nos permitirá contactá-lo(a) para fazer parte desta Rede.
+                </p>
+                <p class="mb-0">
+                    A Federação Portuguesa dos Bancos Alimentares Contra a Fome
+                    <a href="https://www.bancoalimentar.pt/federacao/" target="_blank" rel="noreferrer">https://www.bancoalimentar.pt/federacao/</a>,
+                    disponibiliza-lhe informações importantes respeitantes ao tratamento dos seus dados pessoais que deverá consultar na nossa política de privacidade
+                    <a href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/" target="_blank" rel="noreferrer">https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/</a>,
+                    antes de proceder ao preenchimento e envio.
+                </p>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submeter</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

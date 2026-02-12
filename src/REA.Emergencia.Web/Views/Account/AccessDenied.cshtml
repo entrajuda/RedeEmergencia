@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Acesso negado";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-3">Acesso negado</h1>
+        <p>Não tem permissões para aceder a esta área.</p>
+        @if (!string.IsNullOrWhiteSpace(returnUrl))
+        {
+            <p class="text-muted">URL solicitado: @returnUrl</p>
+        }
+        <a class="btn btn-primary" asp-controller="PedidosBens" asp-action="Index">Voltar ao início</a>
+    </div>
+</div>

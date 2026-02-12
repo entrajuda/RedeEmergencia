@@ -1,0 +1,17 @@
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\bin\Debug\net8.0\REA.Emergencia.Data.deps.json
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\bin\Debug\net8.0\REA.Emergencia.Data.runtimeconfig.json
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\bin\Debug\net8.0\REA.Emergencia.Data.dll
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\bin\Debug\net8.0\REA.Emergencia.Data.pdb
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\bin\Debug\net8.0\REA.Emergencia.Domain.dll
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\bin\Debug\net8.0\REA.Emergencia.Domain.pdb
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\REA.Emergencia.Data.csproj.AssemblyReference.cache
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\REA.Emergencia.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\REA.Emergencia.Data.AssemblyInfoInputs.cache
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\REA.Emergencia.Data.AssemblyInfo.cs
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\REA.Emergencia.Data.csproj.CoreCompileInputs.cache
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\REA.Emer.4464E1BE.Up2Date
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\REA.Emergencia.Data.dll
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\refint\REA.Emergencia.Data.dll
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\REA.Emergencia.Data.pdb
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\REA.Emergencia.Data.genruntimeconfig.cache
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Data\obj\Debug\net8.0\ref\REA.Emergencia.Data.dll

@@ -1,0 +1,11 @@
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\bin\Debug\net8.0\REA.Emergencia.Domain.deps.json
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\bin\Debug\net8.0\REA.Emergencia.Domain.dll
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\bin\Debug\net8.0\REA.Emergencia.Domain.pdb
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\obj\Debug\net8.0\REA.Emergencia.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\obj\Debug\net8.0\REA.Emergencia.Domain.AssemblyInfoInputs.cache
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\obj\Debug\net8.0\REA.Emergencia.Domain.AssemblyInfo.cs
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\obj\Debug\net8.0\REA.Emergencia.Domain.csproj.CoreCompileInputs.cache
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\obj\Debug\net8.0\REA.Emergencia.Domain.dll
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\obj\Debug\net8.0\refint\REA.Emergencia.Domain.dll
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\obj\Debug\net8.0\REA.Emergencia.Domain.pdb
+C:\Users\tiaandra\source\repos\EA.RedeEmergencia\src\REA.Emergencia.Domain\obj\Debug\net8.0\ref\REA.Emergencia.Domain.dll
