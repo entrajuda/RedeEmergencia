@@ -1,0 +1,74 @@
+@model REA.Emergencia.Web.Models.TipoPedidoFormModel
+
+@{
+    ViewData["Title"] = "Novo Tipo de Pedido";
+}
+
+<h1 class="mb-3">Novo Tipo de Pedido</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Nome</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TableName" class="form-label">Nome da Tabela</label>
+        <input asp-for="TableName" class="form-control" />
+        <span asp-validation-for="TableName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Workflow" class="form-label">Workflow (JSON)</label>
+        <textarea asp-for="Workflow" class="form-control workflow-json" rows="14"></textarea>
+        <span asp-validation-for="Workflow" class="text-danger"></span>
+    </div>
+
+    <h3 class="h6 mb-2">Diagrama (Mermaid)</h3>
+    <div class="workflow-mermaid-wrapper mb-4">
+        <pre data-wf-mermaid></pre>
+    </div>
+
+    <div class="workflow-builder mb-4" data-workflow-builder data-workflow-target="Workflow">
+        <h2 class="h5 mb-3">Editor Visual de Workflow</h2>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Workflow ID</label>
+                <input type="text" class="form-control" data-wf-field="id" placeholder="workflow:example:v1" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Nome Workflow</label>
+                <input type="text" class="form-control" data-wf-field="name" placeholder="Workflow Name" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Versao</label>
+                <input type="text" class="form-control" data-wf-field="version" placeholder="1.0.0" />
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Estado Inicial</label>
+                <select class="form-select" data-wf-initial-state></select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end gap-2">
+                <button type="button" class="btn btn-outline-primary" data-wf-add-state>Adicionar Estado</button>
+                <button type="button" class="btn btn-outline-secondary" data-wf-load-json>Carregar JSON</button>
+            </div>
+        </div>
+
+        <div data-wf-states></div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Gravar</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+}

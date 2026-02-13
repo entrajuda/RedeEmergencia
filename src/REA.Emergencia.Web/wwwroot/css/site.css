@@ -33,3 +33,26 @@ body {
   width: 100%;
   height: auto;
 }
+
+.workflow-builder {
+  border: 1px solid #d7dce1;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fafbfd;
+}
+
+.workflow-state-card {
+  border-color: #d7dce1;
+}
+
+.workflow-json {
+  font-family: Consolas, "Courier New", monospace;
+}
+
+.workflow-mermaid-wrapper {
+  border: 1px solid #d7dce1;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  overflow-x: auto;
+}

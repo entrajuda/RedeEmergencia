@@ -1,0 +1,38 @@
+@model REA.Emergencia.Web.Models.ConcelhoFormModel
+
+@{
+    ViewData["Title"] = "Editar Concelho";
+}
+
+<h1 class="mb-3">Editar Concelho</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Concelho" class="form-label">Concelho</label>
+        <input asp-for="Concelho" class="form-control" />
+        <span asp-validation-for="Concelho" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DistritoId" class="form-label">Distrito</label>
+        <select asp-for="DistritoId" asp-items="ViewBag.Distritos" class="form-select">
+            <option value="">Selecione...</option>
+        </select>
+        <span asp-validation-for="DistritoId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ZINF" class="form-label">ZINF</label>
+        <input asp-for="ZINF" class="form-control" />
+        <span asp-validation-for="ZINF" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

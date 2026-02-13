@@ -1,0 +1,21 @@
+@model REA.Emergencia.Domain.TipoPedido
+
+@{
+    ViewData["Title"] = "Eliminar Tipo de Pedido";
+}
+
+<h1 class="mb-3">Eliminar Tipo de Pedido</h1>
+<p>Confirma que pretende eliminar este tipo de pedido?</p>
+
+<dl class="row">
+    <dt class="col-sm-3">Nome</dt>
+    <dd class="col-sm-9">@Model.Name</dd>
+
+    <dt class="col-sm-3">Nome da Tabela</dt>
+    <dd class="col-sm-9">@Model.TableName</dd>
+</dl>
+
+<form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post">
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+</form>

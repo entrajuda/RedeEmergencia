@@ -2,6 +2,16 @@
 
 @{
     ViewData["Title"] = "Preciso de Receber Apoio em Bens não Alimentares";
+
+    static string GetNumericFieldValue(ViewDataDictionary viewData, string key, int currentValue)
+    {
+        if (viewData.ModelState.TryGetValue(key, out var entry) && entry is not null && !string.IsNullOrWhiteSpace(entry.AttemptedValue))
+        {
+            return entry.AttemptedValue;
+        }
+
+        return currentValue == 0 ? string.Empty : currentValue.ToString();
+    }
 }
 
 <div class="row">
@@ -25,99 +35,100 @@
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="mb-3">
-                <label asp-for="FullName" class="form-label">1. O seu nome</label>
-                <input asp-for="FullName" class="form-control" />
+                <label asp-for="FullName" class="form-label">O seu nome</label>
+                <input asp-for="FullName" class="form-control" maxlength="100" />
                 <span asp-validation-for="FullName" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="PhoneNumber" class="form-label">2. O seu número de telemóvel</label>
+                <label asp-for="PhoneNumber" class="form-label">O seu número de telemóvel</label>
                 <input asp-for="PhoneNumber" class="form-control" inputmode="tel" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Email" class="form-label">3. O seu endereço de email</label>
+                <label asp-for="Email" class="form-label">O seu endereço de email</label>
                 <input asp-for="Email" class="form-control" type="email" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Address" class="form-label">4. A sua morada</label>
+                <label asp-for="Address" class="form-label">A sua morada</label>
                 <input asp-for="Address" class="form-control" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="PostalCode" class="form-label">5. Código Postal</label>
+                <label asp-for="PostalCode" class="form-label">Código Postal</label>
                 <input asp-for="PostalCode" class="form-control" placeholder="0000-000" inputmode="numeric" />
                 <span asp-validation-for="PostalCode" class="text-danger"></span>
+                <div id="postalCodeLookupMessage" class="form-text"></div>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Localidade" class="form-label">6. Localidade</label>
+                <label asp-for="Localidade" class="form-label">Localidade</label>
                 <input asp-for="Localidade" class="form-control" />
                 <span asp-validation-for="Localidade" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Freguesia" class="form-label">7. Freguesia</label>
-                <input asp-for="Freguesia" class="form-control" />
+                <label asp-for="Freguesia" class="form-label">Freguesia</label>
+                <input asp-for="Freguesia" class="form-control" readonly />
                 <span asp-validation-for="Freguesia" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Concelho" class="form-label">8. Concelho</label>
-                <input asp-for="Concelho" class="form-control" />
+                <label asp-for="Concelho" class="form-label">Concelho</label>
+                <input asp-for="Concelho" class="form-control" readonly />
                 <span asp-validation-for="Concelho" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="IdentificationNumber" class="form-label">
-                    9. O seu Nº de Identificação (NISS, NIF, Cartão de Cidadão, Bilhete de Identidade, Título de Residência ou Passaporte)
+                    O seu Nº de Identificação (NISS, NIF, Cartão de Cidadão, Bilhete de Identidade, Título de Residência ou Passaporte)
                 </label>
                 <input asp-for="IdentificationNumber" class="form-control" />
                 <span asp-validation-for="IdentificationNumber" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Age" class="form-label">10. Indique a sua idade</label>
-                <input asp-for="Age" class="form-control" type="number" min="0" max="120" />
+                <label asp-for="Age" class="form-label">Indique a sua idade</label>
+                <input id="Age" name="Age" class="form-control" type="number" min="0" max="120" value="@GetNumericFieldValue(ViewData, nameof(Model.Age), Model.Age)" />
                 <span asp-validation-for="Age" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="HouseholdSize" class="form-label">11. Quantas pessoas habitam em sua casa, contando consigo</label>
-                <input asp-for="HouseholdSize" class="form-control" type="number" min="1" max="50" />
+                <label asp-for="HouseholdSize" class="form-label">Quantas pessoas habitam em sua casa, contando consigo</label>
+                <input id="HouseholdSize" name="HouseholdSize" class="form-control" type="number" min="1" max="50" value="@GetNumericFieldValue(ViewData, nameof(Model.HouseholdSize), Model.HouseholdSize)" />
                 <span asp-validation-for="HouseholdSize" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="ChildrenUnder12" class="form-label">12. Quantas crianças com menos de 12 anos vivem consigo?</label>
-                <input asp-for="ChildrenUnder12" class="form-control" type="number" min="0" max="50" />
+                <label asp-for="ChildrenUnder12" class="form-label">Quantas crianças com menos de 12 anos vivem consigo?</label>
+                <input id="ChildrenUnder12" name="ChildrenUnder12" class="form-control" type="number" min="0" max="50" value="@GetNumericFieldValue(ViewData, nameof(Model.ChildrenUnder12), Model.ChildrenUnder12)" />
                 <span asp-validation-for="ChildrenUnder12" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Youth13To17" class="form-label">13. Quantos jovens entre 13 e 17 anos vivem consigo?</label>
-                <input asp-for="Youth13To17" class="form-control" type="number" min="0" max="50" />
+                <label asp-for="Youth13To17" class="form-label">Quantos jovens entre 13 e 17 anos vivem consigo?</label>
+                <input id="Youth13To17" name="Youth13To17" class="form-control" type="number" min="0" max="50" value="@GetNumericFieldValue(ViewData, nameof(Model.Youth13To17), Model.Youth13To17)" />
                 <span asp-validation-for="Youth13To17" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Adults18Plus" class="form-label">14. Quantas pessoas maiores de 18 anos vivem consigo?</label>
-                <input asp-for="Adults18Plus" class="form-control" type="number" min="0" max="50" />
+                <label asp-for="Adults18Plus" class="form-label">Quantas pessoas maiores de 18 anos vivem consigo?</label>
+                <input id="Adults18Plus" name="Adults18Plus" class="form-control" type="number" min="0" max="50" value="@GetNumericFieldValue(ViewData, nameof(Model.Adults18Plus), Model.Adults18Plus)" />
                 <span asp-validation-for="Adults18Plus" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Seniors65Plus" class="form-label">15. E com mais de 65 anos?</label>
-                <input asp-for="Seniors65Plus" class="form-control" type="number" min="0" max="50" />
+                <label asp-for="Seniors65Plus" class="form-label">E com mais de 65 anos?</label>
+                <input id="Seniors65Plus" name="Seniors65Plus" class="form-control" type="number" min="0" max="50" value="@GetNumericFieldValue(ViewData, nameof(Model.Seniors65Plus), Model.Seniors65Plus)" />
                 <span asp-validation-for="Seniors65Plus" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">16. Costuma ser apoiado com alimentos por uma Instituição social</label>
+                <label class="form-label">Costuma ser apoiado com alimentos por uma Instituição social</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" asp-for="ReceivesFoodSupport" value="true" id="receivesFoodSupportYes" />
                     <label class="form-check-label" for="receivesFoodSupportYes">Sim</label>
@@ -130,13 +141,13 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="FoodSupportInstitutionName" class="form-label">17. Se SIM, por favor, indique o nome da Instituição</label>
+                <label asp-for="FoodSupportInstitutionName" class="form-label">Se SIM, por favor, indique o nome da Instituição</label>
                 <input asp-for="FoodSupportInstitutionName" class="form-control" />
                 <span asp-validation-for="FoodSupportInstitutionName" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">18. Tem possibilidade de ir buscar os produtos a um local perto de sua casa</label>
+                <label class="form-label">Tem possibilidade de ir buscar os produtos a um local perto de sua casa</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" asp-for="CanPickUpNearby" value="true" id="canPickUpYes" />
                     <label class="form-check-label" for="canPickUpYes">Sim</label>
@@ -149,7 +160,35 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="Suggestions" class="form-label">19. Sugestões que entenda partilhar</label>
+                <label class="form-label">Tipo de produtos que precisa de receber</label>
+                @{
+                    var productTypes = REA.Emergencia.Web.Models.PedidoBemInputModel.AvailableProductTypes;
+                }
+                @for (var i = 0; i < productTypes.Length; i++)
+                {
+                    var productType = productTypes[i];
+                    var checkboxId = $"productType_{i}";
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="@checkboxId"
+                               name="NeededProductTypes"
+                               value="@productType"
+                               @(Model.NeededProductTypes.Contains(productType) ? "checked" : null) />
+                        <label class="form-check-label" for="@checkboxId">@productType</label>
+                    </div>
+                }
+                <span asp-validation-for="NeededProductTypes" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="OtherNeededProductTypesDetails" class="form-label">Se indicou outros, por favor especificar</label>
+                <input asp-for="OtherNeededProductTypesDetails" class="form-control" />
+                <span asp-validation-for="OtherNeededProductTypesDetails" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Suggestions" class="form-label">Sugestões que entenda partilhar</label>
                 <textarea asp-for="Suggestions" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Suggestions" class="text-danger"></span>
             </div>
@@ -174,4 +213,63 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const postalCodeInput = document.getElementById("PostalCode");
+            const freguesiaInput = document.getElementById("Freguesia");
+            const concelhoInput = document.getElementById("Concelho");
+            const messageElement = document.getElementById("postalCodeLookupMessage");
+            if (!postalCodeInput || !freguesiaInput || !concelhoInput || !messageElement) {
+                return;
+            }
+
+            const setMessage = (text, isError) => {
+                messageElement.textContent = text || "";
+                messageElement.classList.toggle("text-danger", !!isError);
+            };
+
+            const lookupPostalCode = async () => {
+                const raw = (postalCodeInput.value || "").trim();
+                if (!raw) {
+                    freguesiaInput.value = "";
+                    concelhoInput.value = "";
+                    setMessage("", false);
+                    return;
+                }
+
+                const normalized = raw.replace(/\s+/g, "").replace("-", "");
+                if (!/^\d{7}$/.test(normalized)) {
+                    freguesiaInput.value = "";
+                    concelhoInput.value = "";
+                    setMessage("Código postal inválido. Use o formato 0000-000.", true);
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/apoio_bens/codigo-postal?postalCode=${encodeURIComponent(raw)}`, {
+                        method: "GET",
+                        headers: { "Accept": "application/json" }
+                    });
+
+                    if (!response.ok) {
+                        freguesiaInput.value = "";
+                        concelhoInput.value = "";
+                        setMessage("Código postal não encontrado.", true);
+                        return;
+                    }
+
+                    const data = await response.json();
+                    freguesiaInput.value = data.freguesia || "";
+                    concelhoInput.value = data.concelho || "";
+                    setMessage("Código postal validado.", false);
+                } catch {
+                    freguesiaInput.value = "";
+                    concelhoInput.value = "";
+                    setMessage("Não foi possível validar o código postal neste momento.", true);
+                }
+            };
+
+            postalCodeInput.addEventListener("blur", lookupPostalCode);
+        })();
+    </script>
 }

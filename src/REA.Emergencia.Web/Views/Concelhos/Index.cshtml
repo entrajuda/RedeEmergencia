@@ -1,0 +1,37 @@
+@model IReadOnlyList<REA.Emergencia.Domain.Concelho>
+
+@{
+    ViewData["Title"] = "Concelhos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Concelhos</h1>
+    <a class="btn btn-primary" asp-action="Create">Novo Concelho</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Concelho</th>
+            <th>Distrito</th>
+            <th>ZINF</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Nome</td>
+                <td>@item.Distrito.Nome</td>
+                <td>@item.ZINF</td>
+                <td class="text-end">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -53,6 +53,12 @@ public sealed class PedidoBem
 
     public bool CanPickUpNearby { get; set; }
 
+    [MaxLength(500)]
+    public string NeededProductTypes { get; set; } = string.Empty;
+
+    [MaxLength(300)]
+    public string? OtherNeededProductTypesDetails { get; set; }
+
     [MaxLength(1000)]
     public string? Suggestions { get; set; }
 

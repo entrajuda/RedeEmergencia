@@ -6,5 +6,22 @@
     <div class="col-lg-9">
         <h1 class="mb-3">Backoffice</h1>
         <p>Area reservada a utilizadores autenticados com perfil de administrador.</p>
+        <div class="list-group">
+            <a asp-controller="TiposPedido" asp-action="Index" class="list-group-item list-group-item-action">
+                Gerir Tipos de Pedido
+            </a>
+            <a asp-controller="Pedidos" asp-action="Index" class="list-group-item list-group-item-action">
+                Consultar Pedidos
+            </a>
+            <a asp-controller="Distritos" asp-action="Index" class="list-group-item list-group-item-action">
+                Gerir Distritos
+            </a>
+            <a asp-controller="Concelhos" asp-action="Index" class="list-group-item list-group-item-action">
+                Gerir Concelhos
+            </a>
+            <a asp-controller="CodigosPostais" asp-action="Index" class="list-group-item list-group-item-action">
+                Gerir Códigos Postais
+            </a>
+        </div>
     </div>
 </div>

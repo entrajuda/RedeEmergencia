@@ -1,0 +1,104 @@
+@model REA.Emergencia.Domain.TipoPedido
+
+@{
+    ViewData["Title"] = "Detalhe Tipo de Pedido";
+}
+
+<h1 class="mb-3">Detalhe Tipo de Pedido</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">ID</dt>
+    <dd class="col-sm-9">@Model.Id</dd>
+
+    <dt class="col-sm-3">Nome</dt>
+    <dd class="col-sm-9">@Model.Name</dd>
+
+    <dt class="col-sm-3">Nome da Tabela</dt>
+    <dd class="col-sm-9">@Model.TableName</dd>
+
+    <dt class="col-sm-3">Workflow</dt>
+    <dd class="col-sm-9">
+        <div class="workflow-mermaid-wrapper mb-3">
+            <pre class="mermaid" id="workflowMermaidPreview"></pre>
+        </div>
+        <pre class="mb-0">@Model.Workflow</pre>
+    </dd>
+
+    <dt class="col-sm-3">Data Criação (UTC)</dt>
+    <dd class="col-sm-9">@Model.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+<a asp-action="Index" class="btn btn-outline-secondary">Voltar</a>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        (function () {
+            const rawWorkflow = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Workflow));
+            const target = document.getElementById("workflowMermaidPreview");
+            if (!target) {
+                return;
+            }
+
+            function toNodeId(key, index) {
+                const clean = (key || "").replace(/[^a-zA-Z0-9_]/g, "_");
+                return clean.length > 0 ? `S_${clean}` : `S_IDX_${index}`;
+            }
+
+            function esc(value) {
+                return (value || "").replace(/"/g, '\\"');
+            }
+
+            function buildMermaidText(workflow) {
+                const states = Array.isArray(workflow.states) ? workflow.states : [];
+                if (states.length === 0) {
+                    return "flowchart LR\n  Empty[\"Sem estados\"]";
+                }
+
+                const lines = ["flowchart LR", "  Start((\"Start\"))"];
+                const ids = states.map((state, index) => toNodeId(state.key, index));
+
+                states.forEach((state, index) => {
+                    const baseLabel = (state.label && state.label.trim()) ? state.label : (state.key || `State ${index + 1}`);
+                    const fullLabel = `${baseLabel}\\n(${state.key || "sem_key"})`;
+                    if (state.type === "terminal") {
+                        lines.push(`  ${ids[index]}((" ${esc(fullLabel)} "))`);
+                    } else {
+                        lines.push(`  ${ids[index]}["${esc(fullLabel)}"]`);
+                    }
+                });
+
+                states.forEach((state, index) => {
+                    const fromId = ids[index];
+                    const transitions = Array.isArray(state.transitions) ? state.transitions : [];
+                    transitions.forEach((transition) => {
+                        const targetIndex = states.findIndex((x) => x.key === transition.to);
+                        if (targetIndex < 0) {
+                            return;
+                        }
+                        const eventLabel = transition.event ? `|"${esc(transition.event)}"|` : "";
+                        lines.push(`  ${fromId} -->${eventLabel} ${ids[targetIndex]}`);
+                    });
+                });
+
+                const initialIndex = states.findIndex((x) => x.key === workflow.initialState);
+                if (initialIndex >= 0) {
+                    lines.push(`  Start --> ${ids[initialIndex]}`);
+                }
+
+                return lines.join("\n");
+            }
+
+            try {
+                const workflow = JSON.parse(rawWorkflow || "{}");
+                target.textContent = buildMermaidText(workflow);
+
+                mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
+                mermaid.run({ nodes: [target] });
+            } catch (error) {
+                console.error("Erro ao renderizar diagrama Mermaid.", error);
+            }
+        })();
+    </script>
+}

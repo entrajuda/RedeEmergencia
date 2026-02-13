@@ -2,6 +2,16 @@ namespace REA.Emergencia.Web.Models;
 
 public sealed class PedidoBemInputModel
 {
+    public static readonly string[] AvailableProductTypes =
+    [
+        "Materiais de construção",
+        "Produtos de limpeza",
+        "Produtos de higiene",
+        "Roupa de casa",
+        "Eletrodomésticos",
+        "Outros"
+    ];
+
     public string FullName { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
@@ -20,5 +30,7 @@ public sealed class PedidoBemInputModel
     public bool? ReceivesFoodSupport { get; set; }
     public string? FoodSupportInstitutionName { get; set; }
     public bool? CanPickUpNearby { get; set; }
+    public List<string> NeededProductTypes { get; set; } = [];
+    public string? OtherNeededProductTypesDetails { get; set; }
     public string? Suggestions { get; set; }
 }

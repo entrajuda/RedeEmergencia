@@ -1,0 +1,24 @@
+@model REA.Emergencia.Domain.Concelho
+
+@{
+    ViewData["Title"] = "Eliminar Concelho";
+}
+
+<h1 class="mb-3">Eliminar Concelho</h1>
+<p>Confirma que pretende eliminar este concelho?</p>
+
+<dl class="row">
+    <dt class="col-sm-3">Concelho</dt>
+    <dd class="col-sm-9">@Model.Nome</dd>
+
+    <dt class="col-sm-3">Distrito</dt>
+    <dd class="col-sm-9">@Model.Distrito.Nome</dd>
+
+    <dt class="col-sm-3">ZINF</dt>
+    <dd class="col-sm-9">@Model.ZINF</dd>
+</dl>
+
+<form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post">
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+</form>

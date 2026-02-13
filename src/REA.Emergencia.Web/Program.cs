@@ -9,7 +9,17 @@ using REA.Emergencia.Web.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+
+    options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(_ => "Este campo é obrigatório.");
+    options.ModelBindingMessageProvider.SetMissingBindRequiredValueAccessor(fieldName => $"O campo '{fieldName}' é obrigatório.");
+    options.ModelBindingMessageProvider.SetMissingKeyOrValueAccessor(() => "É necessário um valor.");
+    options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((value, fieldName) => $"O valor '{value}' não é válido para {fieldName}.");
+    options.ModelBindingMessageProvider.SetUnknownValueIsInvalidAccessor(fieldName => $"O valor fornecido não é válido para {fieldName}.");
+    options.ModelBindingMessageProvider.SetValueIsInvalidAccessor(value => $"O valor '{value}' não é válido.");
+});
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<PedidoBemInputModelValidator>();

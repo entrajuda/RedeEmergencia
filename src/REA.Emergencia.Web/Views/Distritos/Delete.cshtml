@@ -1,0 +1,27 @@
+@model REA.Emergencia.Domain.Distrito
+
+@{
+    ViewData["Title"] = "Eliminar Distrito";
+}
+
+<h1 class="mb-3">Eliminar Distrito</h1>
+<p>Confirma que pretende eliminar este distrito?</p>
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+@if (ViewBag.DeleteBlockMessage is string message)
+{
+    <div class="alert alert-warning">@message</div>
+}
+
+<dl class="row">
+    <dt class="col-sm-3">Distrito</dt>
+    <dd class="col-sm-9">@Model.Nome</dd>
+</dl>
+
+<form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post">
+    @if (ViewBag.CanDelete is bool canDelete && canDelete)
+    {
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+    }
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+</form>

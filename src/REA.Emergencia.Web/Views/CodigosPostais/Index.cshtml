@@ -1,0 +1,80 @@
+@model REA.Emergencia.Web.Models.CodigosPostaisIndexViewModel
+
+@{
+    ViewData["Title"] = "Códigos Postais";
+}
+
+<h1 class="mb-3">Códigos Postais</h1>
+
+<form method="get" class="row g-3 align-items-end mb-3">
+    <div class="col-md-4">
+        <label for="distritoId" class="form-label">Distrito</label>
+        <select id="distritoId" name="distritoId" class="form-select" asp-items="Model.DistritoOptions">
+            <option value="">Todos</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label for="concelho" class="form-label">Concelho</label>
+        <input id="concelho" name="concelho" value="@Model.Concelho" class="form-control" />
+    </div>
+    <div class="col-md-4">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Limpar</a>
+    </div>
+</form>
+
+<p class="text-muted">
+    A mostrar @Model.StartItem - @Model.EndItem de @Model.TotalItems registos.
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Número</th>
+            <th>Freguesia</th>
+            <th>Concelho</th>
+            <th>Distrito</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Items.Count == 0)
+        {
+            <tr>
+                <td colspan="4" class="text-muted">Sem resultados.</td>
+            </tr>
+        }
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Numero</td>
+                <td>@item.Freguesia</td>
+                <td>@item.Concelho</td>
+                <td>@item.Distrito</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav aria-label="Paginação de códigos postais">
+    <ul class="pagination">
+        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-page="@(Model.Page - 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-distritoId="@Model.DistritoId"
+               asp-route-concelho="@Model.Concelho">Anterior</a>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">Página @Model.Page de @Model.TotalPages</span>
+        </li>
+        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-page="@(Model.Page + 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-distritoId="@Model.DistritoId"
+               asp-route-concelho="@Model.Concelho">Próxima</a>
+        </li>
+    </ul>
+</nav>

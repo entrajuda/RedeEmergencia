@@ -1,0 +1,43 @@
+@model REA.Emergencia.Web.Models.PedidosIndexViewModel
+
+@{
+    ViewData["Title"] = "Pedidos";
+}
+
+<h1 class="mb-3">Pedidos</h1>
+
+<form method="get" class="row g-3 align-items-end mb-3">
+    <div class="col-md-5">
+        <label for="tipoPedidoId" class="form-label">Tipo de Pedido</label>
+        <select id="tipoPedidoId" name="tipoPedidoId" class="form-select" asp-items="Model.TipoPedidoOptions">
+            <option value="">Todos</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Data Criação (UTC)</th>
+            <th>Estado</th>
+            <th>ExternalRequestID</th>
+            <th>Tipo de Pedido</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pedido in Model.Pedidos)
+        {
+            <tr>
+                <td>@pedido.Id</td>
+                <td>@pedido.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@pedido.State</td>
+                <td>@pedido.ExternalRequestID</td>
+                <td>@pedido.TipoPedidoName</td>
+            </tr>
+        }
+    </tbody>
+</table>

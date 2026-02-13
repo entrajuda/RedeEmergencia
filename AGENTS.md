@@ -3,7 +3,7 @@
 ## Project Overview
 - App name: REA Emergencia
 - Stack: ASP.NET Core (MVC), Entity Framework Core, SQL Server
-- Target framework: net8.0
+- Target framework: net10.0
 
 ## Workflows
 - Default UI: MVC with Razor views

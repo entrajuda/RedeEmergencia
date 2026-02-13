@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using REA.Emergencia.Data;
 
@@ -11,9 +12,11 @@ using REA.Emergencia.Data;
 namespace REA.Emergencia.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260213083715_AddCodigoPostal")]
+    partial class AddCodigoPostal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,7 +44,7 @@ namespace REA.Emergencia.Data.Migrations
 
                     b.ToTable("CodigosPostais", null, t =>
                         {
-                            t.HasCheckConstraint("CK_CodigosPostais_Numero_Range", "[Numero] >= 1000000 AND [Numero] <= 9999999");
+                            t.HasCheckConstraint("CK_CodigosPostais_Numero_Range", "[Numero] >= 1000000 AND [Numero] <= 9000000");
                         });
                 });
 

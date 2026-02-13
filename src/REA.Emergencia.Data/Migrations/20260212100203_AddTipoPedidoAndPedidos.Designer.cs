@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using REA.Emergencia.Data;
 
@@ -11,9 +12,11 @@ using REA.Emergencia.Data;
 namespace REA.Emergencia.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260212100203_AddTipoPedidoAndPedidos")]
+    partial class AddTipoPedidoAndPedidos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,77 +24,6 @@ namespace REA.Emergencia.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("REA.Emergencia.Domain.CodigoPostal", b =>
-                {
-                    b.Property<int>("Numero")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ConcelhoId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Freguesia")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Numero");
-
-                    b.HasIndex("ConcelhoId");
-
-                    b.ToTable("CodigosPostais", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_CodigosPostais_Numero_Range", "[Numero] >= 1000000 AND [Numero] <= 9999999");
-                        });
-                });
-
-            modelBuilder.Entity("REA.Emergencia.Domain.Concelho", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DistritoId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("Concelho");
-
-                    b.Property<string>("ZINF")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DistritoId");
-
-                    b.ToTable("Concelhos", (string)null);
-                });
-
-            modelBuilder.Entity("REA.Emergencia.Domain.Distrito", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("Distrito");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Distritos", (string)null);
-                });
 
             modelBuilder.Entity("REA.Emergencia.Domain.Pedido", b =>
                 {
@@ -189,15 +121,6 @@ namespace REA.Emergencia.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("NeededProductTypes")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("OtherNeededProductTypesDetails")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -258,28 +181,6 @@ namespace REA.Emergencia.Data.Migrations
                     b.ToTable("TiposPedido", (string)null);
                 });
 
-            modelBuilder.Entity("REA.Emergencia.Domain.CodigoPostal", b =>
-                {
-                    b.HasOne("REA.Emergencia.Domain.Concelho", "Concelho")
-                        .WithMany("CodigosPostais")
-                        .HasForeignKey("ConcelhoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Concelho");
-                });
-
-            modelBuilder.Entity("REA.Emergencia.Domain.Concelho", b =>
-                {
-                    b.HasOne("REA.Emergencia.Domain.Distrito", "Distrito")
-                        .WithMany("Concelhos")
-                        .HasForeignKey("DistritoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Distrito");
-                });
-
             modelBuilder.Entity("REA.Emergencia.Domain.Pedido", b =>
                 {
                     b.HasOne("REA.Emergencia.Domain.TipoPedido", "TipoPedido")
@@ -289,16 +190,6 @@ namespace REA.Emergencia.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("TipoPedido");
-                });
-
-            modelBuilder.Entity("REA.Emergencia.Domain.Concelho", b =>
-                {
-                    b.Navigation("CodigosPostais");
-                });
-
-            modelBuilder.Entity("REA.Emergencia.Domain.Distrito", b =>
-                {
-                    b.Navigation("Concelhos");
                 });
 
             modelBuilder.Entity("REA.Emergencia.Domain.TipoPedido", b =>
