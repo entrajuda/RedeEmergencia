@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace REA.Emergencia.Web.Controllers;
 
-[AllowAnonymous]
 public sealed class AccountController : Controller
 {
+    [AllowAnonymous]
     [HttpGet]
     public IActionResult AccessDenied(string? returnUrl = null)
     {

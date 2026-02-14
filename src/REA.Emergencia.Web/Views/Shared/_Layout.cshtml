@@ -11,9 +11,11 @@
 <body>
     @{
         var isBackoffice = Context.Request.Path.StartsWithSegments("/backoffice");
+        var isEncaminhamento = Context.Request.Path.StartsWithSegments("/encaminhamento");
+        var isInternalArea = isBackoffice || isEncaminhamento;
     }
     <header>
-        @if (!isBackoffice)
+        @if (!isInternalArea)
         {
             <div class="site-header-image">
                 <img src="~/img/header.png" alt="Rede de Emergência Solidária" width="645" height="164"/>
@@ -38,7 +40,7 @@
                 </div>
             </nav>
         }
-        @if (isBackoffice)
+        @if (isInternalArea)
         {
             <div class="site-header-image">
                 <img src="~/img/header.png" alt="Rede de Emergência Solidária" width="645" height="164" />
@@ -47,8 +49,27 @@
                 <div class="container-fluid">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Backoffice" asp-action="Index">Voltar ao Menu Backoffice</a>
+                            @if (isBackoffice)
+                            {
+                                <a class="nav-link text-dark" asp-controller="Backoffice" asp-action="Index">Voltar ao Menu Backoffice</a>
+                            }
+                            @if (isEncaminhamento)
+                            {
+                                <a class="nav-link text-dark" asp-area="Encaminhamento" asp-controller="Encaminhamento" asp-action="Index">Voltar ao Menu Encaminhamento</a>
+                            }
                         </li>
+                        @if (isEncaminhamento)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Backoffice" asp-action="Index">Ir para Backoffice</a>
+                            </li>
+                        }
+                        @if (isBackoffice)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="Encaminhamento" asp-controller="Encaminhamento" asp-action="Index">Ir para Encaminhamento</a>
+                            </li>
+                        }
                     </ul>
                     @if (User.Identity?.IsAuthenticated == true)
                     {

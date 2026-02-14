@@ -24,7 +24,7 @@
             <th>ID</th>
             <th>Data Criação (UTC)</th>
             <th>Estado</th>
-            <th>ExternalRequestID</th>
+            <th>Pedido</th>
             <th>Tipo de Pedido</th>
         </tr>
     </thead>
@@ -35,7 +35,9 @@
                 <td>@pedido.Id</td>
                 <td>@pedido.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
                 <td>@pedido.State</td>
-                <td>@pedido.ExternalRequestID</td>
+                <td>
+                    <a asp-area="Encaminhamento" asp-controller="Pedidos" asp-action="Details" asp-route-id="@pedido.Id">Ver detalhes</a>
+                </td>
                 <td>@pedido.TipoPedidoName</td>
             </tr>
         }
