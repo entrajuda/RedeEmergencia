@@ -228,6 +228,19 @@
                 messageElement.classList.toggle("text-danger", !!isError);
             };
 
+            const formatPostalCodeInput = () => {
+                const value = postalCodeInput.value || "";
+                const digits = value.replace(/\D/g, "").slice(0, 7);
+
+                if (digits.length >= 4) {
+                    const first = digits.slice(0, 4);
+                    const last = digits.slice(4);
+                    postalCodeInput.value = `${first}-${last}`;
+                } else {
+                    postalCodeInput.value = digits;
+                }
+            };
+
             const lookupPostalCode = async () => {
                 const raw = (postalCodeInput.value || "").trim();
                 if (!raw) {
@@ -269,6 +282,38 @@
                 }
             };
 
+            postalCodeInput.addEventListener("input", formatPostalCodeInput);
+            postalCodeInput.addEventListener("keydown", (event) => {
+                if (event.key === "-" && (postalCodeInput.value || "").includes("-")) {
+                    event.preventDefault();
+                    return;
+                }
+
+                if (event.key === "Backspace") {
+                    const value = postalCodeInput.value || "";
+                    const start = postalCodeInput.selectionStart ?? 0;
+                    const end = postalCodeInput.selectionEnd ?? 0;
+
+                    // If value ends with '-' and caret is at the end (e.g. 1232-),
+                    // remove both '-' and previous digit.
+                    if (start === end && start === value.length && value.endsWith("-") && value.length >= 2) {
+                        event.preventDefault();
+                        postalCodeInput.value = value.slice(0, value.length - 2);
+                        const newPos = postalCodeInput.value.length;
+                        postalCodeInput.setSelectionRange(newPos, newPos);
+                        return;
+                    }
+
+                    // If caret is just after '-', remove the digit before it.
+                    if (start === end && start > 1 && value[start - 1] === "-") {
+                        event.preventDefault();
+                        postalCodeInput.value = `${value.slice(0, start - 2)}${value.slice(start - 1)}`;
+                        const newPos = start - 1;
+                        postalCodeInput.setSelectionRange(newPos, newPos);
+                        formatPostalCodeInput();
+                    }
+                }
+            });
             postalCodeInput.addEventListener("blur", lookupPostalCode);
         })();
     </script>

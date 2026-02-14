@@ -146,7 +146,6 @@ $connection = [System.Data.SqlClient.SqlConnection]::new($ConnectionString)
 Log-Info "A abrir ligacao SQL..."
 $connection.Open()
 Log-Info "Ligacao SQL aberta."
-$transaction = $connection.BeginTransaction()
 
 $inserted = 0
 $updated = 0
@@ -158,6 +157,7 @@ $skippedByReason = @{
     "NumeroForaIntervalo" = 0
     "CamposObrigatoriosVazios" = 0
     "ConcelhoNaoEncontrado" = 0
+    "CodigoPostalJaExiste" = 0
     "DbCheckConstraintNumeroRange" = 0
 }
 $distinctErrors = New-Object System.Collections.Generic.HashSet[string]
@@ -165,7 +165,6 @@ $emptyFieldErrors = New-Object System.Collections.Generic.List[object]
 
 try {
     $concelhosCmd = $connection.CreateCommand()
-    $concelhosCmd.Transaction = $transaction
     $concelhosCmd.CommandText = "SELECT Id, Concelho FROM Concelhos"
     $reader = $concelhosCmd.ExecuteReader()
 
@@ -254,7 +253,6 @@ try {
 
         try {
             $checkCmd = $connection.CreateCommand()
-            $checkCmd.Transaction = $transaction
             $checkCmd.CommandText = "SELECT TOP 1 Numero FROM CodigosPostais WHERE Numero = @Numero"
             [void]$checkCmd.Parameters.Add("@Numero", [System.Data.SqlDbType]::Int)
             $checkCmd.Parameters["@Numero"].Value = $numero
@@ -262,7 +260,6 @@ try {
 
             if ($null -eq $existingNumero) {
                 $insertCmd = $connection.CreateCommand()
-                $insertCmd.Transaction = $transaction
                 $insertCmd.CommandText = @"
 INSERT INTO CodigosPostais (Numero, Freguesia, ConcelhoId)
 VALUES (@Numero, @Freguesia, @ConcelhoId)
@@ -277,23 +274,9 @@ VALUES (@Numero, @Freguesia, @ConcelhoId)
                 $inserted++
                 Log-Debug "Linha ${processed}: INSERT Numero=$numero, Freguesia='$freguesia', ConcelhoId=$concelhoId."
             } else {
-                $updateCmd = $connection.CreateCommand()
-                $updateCmd.Transaction = $transaction
-                $updateCmd.CommandText = @"
-UPDATE CodigosPostais
-SET Freguesia = @Freguesia,
-    ConcelhoId = @ConcelhoId
-WHERE Numero = @Numero
-"@
-                [void]$updateCmd.Parameters.Add("@Numero", [System.Data.SqlDbType]::Int)
-                [void]$updateCmd.Parameters.Add("@Freguesia", [System.Data.SqlDbType]::NVarChar, 200)
-                [void]$updateCmd.Parameters.Add("@ConcelhoId", [System.Data.SqlDbType]::Int)
-                $updateCmd.Parameters["@Numero"].Value = $numero
-                $updateCmd.Parameters["@Freguesia"].Value = $freguesia
-                $updateCmd.Parameters["@ConcelhoId"].Value = $concelhoId
-                [void]$updateCmd.ExecuteNonQuery()
-                $updated++
-                Log-Debug "Linha ${processed}: UPDATE Numero=$numero, Freguesia='$freguesia', ConcelhoId=$concelhoId."
+                $skipped++
+                $skippedByReason["CodigoPostalJaExiste"]++
+                Log-Debug "Linha ${processed}: IGNORADA Numero=$numero (codigo postal ja existe)."
             }
         }
         catch {
@@ -313,8 +296,6 @@ WHERE Numero = @Numero
         }
     }
 
-    $transaction.Commit()
-
     Log-Info "Importacao concluida."
     Write-Host "Resumo:"
     Write-Host " - Processados: $processed"
@@ -327,6 +308,7 @@ WHERE Numero = @Numero
     Write-Host "   * Numero fora do intervalo [1000000..9999999]: $($skippedByReason["NumeroForaIntervalo"])"
     Write-Host "   * Freguesia/Concelho vazio: $($skippedByReason["CamposObrigatoriosVazios"])"
     Write-Host "   * Concelho nao encontrado: $($skippedByReason["ConcelhoNaoEncontrado"])"
+    Write-Host "   * Codigo postal ja existe: $($skippedByReason["CodigoPostalJaExiste"])"
     Write-Host "   * Erro DB (CK_CodigosPostais_Numero_Range): $($skippedByReason["DbCheckConstraintNumeroRange"])"
 
     if ($missingConcelhosByNormalized.Count -gt 0) {
@@ -354,12 +336,6 @@ WHERE Numero = @Numero
 
 }
 catch {
-    try {
-        $transaction.Rollback()
-        Log-Warn "Transacao revertida devido a erro."
-    }
-    catch {
-    }
     throw
 }
 finally {
