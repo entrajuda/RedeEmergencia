@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using REA.Emergencia.Data;
 using REA.Emergencia.Domain;
 using REA.Emergencia.Web.Models;
+using REA.Emergencia.Web.Services;
 using System.Text.Json;
 
 namespace REA.Emergencia.Web.Controllers;
@@ -10,10 +11,20 @@ namespace REA.Emergencia.Web.Controllers;
 public sealed class PedidosBensController : Controller
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IAppSettingsService _appSettingsService;
+    private readonly IRequestNotificationEmailService _requestNotificationEmailService;
+    private readonly ILogger<PedidosBensController> _logger;
 
-    public PedidosBensController(ApplicationDbContext dbContext)
+    public PedidosBensController(
+        ApplicationDbContext dbContext,
+        IAppSettingsService appSettingsService,
+        IRequestNotificationEmailService requestNotificationEmailService,
+        ILogger<PedidosBensController> logger)
     {
         _dbContext = dbContext;
+        _appSettingsService = appSettingsService;
+        _requestNotificationEmailService = requestNotificationEmailService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -107,19 +118,47 @@ public sealed class PedidosBensController : Controller
             ExternalRequestID = entity.Id,
             TipoPedidoId = tipoPedido.Id,
             State = ExtractInitialState(tipoPedido.Workflow) ?? "NOVO",
+            ZinfId = codigoPostal.Concelho.ZinfId
         };
 
         _dbContext.Pedidos.Add(pedido);
         await _dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
-        return RedirectToAction(nameof(Success));
+        await TrySendSubmissionEmailAsync(model.Email, pedido.PublicId, cancellationToken);
+
+        return RedirectToAction(nameof(Success), new { publicId = pedido.PublicId });
     }
 
     [HttpGet]
-    public IActionResult Success()
+    public IActionResult Success(Guid? publicId)
     {
+        ViewData["PublicId"] = publicId;
         return View();
+    }
+
+    [HttpGet("pedido/{publicId:guid}")]
+    public async Task<IActionResult> EstadoPedido(Guid publicId, CancellationToken cancellationToken)
+    {
+        var pedido = await _dbContext.Pedidos
+            .AsNoTracking()
+            .Include(x => x.TipoPedido)
+            .FirstOrDefaultAsync(x => x.PublicId == publicId, cancellationToken);
+
+        if (pedido is null)
+        {
+            return NotFound();
+        }
+
+        var model = new PedidoStatusViewModel
+        {
+            PublicId = pedido.PublicId,
+            State = pedido.State,
+            CreatedAtUtc = pedido.CreatedAtUtc,
+            TipoPedido = pedido.TipoPedido.Name
+        };
+
+        return View(model);
     }
 
     [HttpGet("apoio_bens/codigo-postal")]
@@ -147,6 +186,44 @@ public sealed class PedidosBensController : Controller
             freguesia = codigoPostal.Freguesia,
             concelho = codigoPostal.Concelho.Nome
         });
+    }
+
+    private async Task TrySendSubmissionEmailAsync(string recipientEmail, Guid pedidoPublicId, CancellationToken cancellationToken)
+    {
+        var sendEmailToPedidoCreatorRaw = await _appSettingsService.GetValueAsync(AppSettingKeys.SendEmailToPedidoCreator, cancellationToken);
+        var sendEmailToPedidoCreator = !string.IsNullOrWhiteSpace(sendEmailToPedidoCreatorRaw)
+            ? string.Equals(sendEmailToPedidoCreatorRaw, "true", StringComparison.OrdinalIgnoreCase)
+            : true;
+
+        if (!sendEmailToPedidoCreator)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(recipientEmail))
+        {
+            return;
+        }
+
+        var template = await _appSettingsService.GetValueAsync(AppSettingKeys.PedidoBensEmailTemplate, cancellationToken)
+                       ?? await _appSettingsService.GetValueAsync("SubmissionEmailTemplate", cancellationToken);
+        if (string.IsNullOrWhiteSpace(template))
+        {
+            return;
+        }
+
+        try
+        {
+            await _requestNotificationEmailService.SendRequestSubmittedEmailAsync(
+                recipientEmail.Trim(),
+                pedidoPublicId,
+                template,
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao enviar email de confirmação para o pedido {PedidoPublicId}.", pedidoPublicId);
+        }
     }
 
     private static string? ExtractInitialState(string workflowJson)

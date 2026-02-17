@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using REA.Emergencia.Data;
 using REA.Emergencia.Domain;
+using REA.Emergencia.Web.Helpers;
 using REA.Emergencia.Web.Models;
 
 namespace REA.Emergencia.Web.Areas.Encaminhamento.Controllers;
@@ -23,6 +25,21 @@ public sealed class PedidosController : Controller
     [HttpGet("")]
     public async Task<IActionResult> Index(int? tipoPedidoId, CancellationToken cancellationToken)
     {
+        var isAdmin = User.IsInRole("Admin");
+        var userZinfIds = isAdmin ? [] : await GetCurrentUserZinfIdsAsync(cancellationToken);
+        var accessibleZinfs = isAdmin
+            ? await _dbContext.Zinfs
+                .AsNoTracking()
+                .OrderBy(x => x.Nome)
+                .Select(x => x.Nome)
+                .ToListAsync(cancellationToken)
+            : await _dbContext.Zinfs
+                .AsNoTracking()
+                .Where(x => userZinfIds.Contains(x.Id))
+                .OrderBy(x => x.Nome)
+                .Select(x => x.Nome)
+                .ToListAsync(cancellationToken);
+
         var tipoPedidoOptions = await _dbContext.TiposPedido
             .AsNoTracking()
             .OrderBy(x => x.Name)
@@ -33,18 +50,37 @@ public sealed class PedidosController : Controller
             })
             .ToListAsync(cancellationToken);
 
-        var query = _dbContext.Pedidos
-            .AsNoTracking()
-            .Include(x => x.TipoPedido)
-            .AsQueryable();
+        var pedidosRawQuery =
+            from p in _dbContext.Pedidos.AsNoTracking()
+            join tp in _dbContext.TiposPedido.AsNoTracking() on p.TipoPedidoId equals tp.Id
+            join z in _dbContext.Zinfs.AsNoTracking() on p.ZinfId equals z.Id into zJoin
+            from z in zJoin.DefaultIfEmpty()
+            where tp.TableName == "PedidosBens"
+            select new
+            {
+                p.Id,
+                p.CreatedAtUtc,
+                p.State,
+                p.ExternalRequestID,
+                p.TipoPedidoId,
+                TipoPedidoName = tp.Name,
+                p.ZinfId,
+                ZinfName = z != null ? z.Nome : "-"
+            };
 
         if (tipoPedidoId.HasValue)
         {
-            query = query.Where(x => x.TipoPedidoId == tipoPedidoId.Value);
+            pedidosRawQuery = pedidosRawQuery.Where(x => x.TipoPedidoId == tipoPedidoId.Value);
         }
 
-        var pedidos = await query
+        var pedidosRaw = await pedidosRawQuery
+            .Where(x => isAdmin || (x.ZinfId.HasValue && userZinfIds.Contains(x.ZinfId.Value)))
             .OrderByDescending(x => x.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+
+        var pedidos = pedidosRaw
+            .GroupBy(x => x.Id)
+            .Select(g => g.First())
             .Select(x => new PedidoListItemViewModel
             {
                 Id = x.Id,
@@ -52,15 +88,18 @@ public sealed class PedidosController : Controller
                 State = x.State,
                 ExternalRequestID = x.ExternalRequestID,
                 TipoPedidoId = x.TipoPedidoId,
-                TipoPedidoName = x.TipoPedido.Name,
+                TipoPedidoName = x.TipoPedidoName,
+                ZinfName = x.ZinfName
             })
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         var model = new PedidosIndexViewModel
         {
             TipoPedidoId = tipoPedidoId,
             TipoPedidoOptions = tipoPedidoOptions,
             Pedidos = pedidos,
+            IsAdmin = isAdmin,
+            AccessibleZinfs = accessibleZinfs
         };
 
         return View(model);
@@ -69,6 +108,9 @@ public sealed class PedidosController : Controller
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Details(int id, CancellationToken cancellationToken)
     {
+        var isAdmin = User.IsInRole("Admin");
+        var userZinfIds = isAdmin ? [] : await GetCurrentUserZinfIdsAsync(cancellationToken);
+
         var pedido = await _dbContext.Pedidos
             .AsNoTracking()
             .Include(x => x.TipoPedido)
@@ -77,6 +119,11 @@ public sealed class PedidosController : Controller
         if (pedido is null)
         {
             return NotFound();
+        }
+
+        if (!string.Equals(pedido.TipoPedido.TableName, "PedidosBens", StringComparison.OrdinalIgnoreCase))
+        {
+            return Forbid();
         }
 
         var model = new PedidoDetailsViewModel
@@ -89,22 +136,55 @@ public sealed class PedidosController : Controller
             ExternalRequestID = pedido.ExternalRequestID
         };
 
-        if (string.Equals(pedido.TipoPedido.TableName, "PedidosBens", StringComparison.OrdinalIgnoreCase))
+        var pedidoBem = await _dbContext.PedidosBens
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == pedido.ExternalRequestID, cancellationToken);
+
+        if (pedidoBem is null)
         {
-            var pedidoBem = await _dbContext.PedidosBens
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == pedido.ExternalRequestID, cancellationToken);
-
-            if (pedidoBem is null)
-            {
-                return NotFound();
-            }
-
-            model.IsSupportedType = true;
-            model.Fields = BuildPedidoBemFields(pedidoBem);
+            return NotFound();
         }
 
+        var pedidoZinfId = pedido.ZinfId;
+
+        if (!pedidoZinfId.HasValue || (!isAdmin && !userZinfIds.Contains(pedidoZinfId.Value)))
+        {
+            return Forbid();
+        }
+
+        model.IsSupportedType = true;
+        model.Fields = BuildPedidoBemFields(pedidoBem);
+
         return View(model);
+    }
+
+    private async Task<HashSet<int>> GetCurrentUserZinfIdsAsync(CancellationToken cancellationToken)
+    {
+        var userPrincipalName =
+            User.FindFirstValue("preferred_username") ??
+            User.FindFirstValue("upn") ??
+            User.FindFirstValue(ClaimTypes.Upn) ??
+            User.FindFirstValue(ClaimTypes.Email) ??
+            User.Identity?.Name;
+
+        if (string.IsNullOrWhiteSpace(userPrincipalName))
+        {
+            return [];
+        }
+
+        var candidates = UserPrincipalNameNormalizer.BuildCandidates(userPrincipalName);
+        if (candidates.Count == 0)
+        {
+            return [];
+        }
+
+        var zinfIds = await _dbContext.UserZinfs
+            .AsNoTracking()
+            .Where(x => candidates.Contains(x.UserPrincipalName))
+            .Select(x => x.ZinfId)
+            .ToListAsync(cancellationToken);
+
+        return zinfIds.ToHashSet();
     }
 
     private static IReadOnlyList<PedidoDetailFieldViewModel> BuildPedidoBemFields(PedidoBem pedidoBem)

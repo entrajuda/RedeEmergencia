@@ -1,0 +1,15 @@
+@model REA.Emergencia.Web.Models.PedidoStatusViewModel
+
+@{
+    ViewData["Title"] = "Estado do pedido";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-3">Estado do pedido</h1>
+        <p class="mb-1"><strong>Código do pedido:</strong> @Model.PublicId</p>
+        <p class="mb-1"><strong>Tipo:</strong> @Model.TipoPedido</p>
+        <p class="mb-1"><strong>Estado atual:</strong> @Model.State</p>
+        <p class="mb-0"><strong>Data de criação (UTC):</strong> @Model.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</p>
+    </div>
+</div>

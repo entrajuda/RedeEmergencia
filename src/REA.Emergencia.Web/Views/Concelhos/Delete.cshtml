@@ -15,7 +15,7 @@
     <dd class="col-sm-9">@Model.Distrito.Nome</dd>
 
     <dt class="col-sm-3">ZINF</dt>
-    <dd class="col-sm-9">@Model.ZINF</dd>
+    <dd class="col-sm-9">@(Model.Zinf?.Nome ?? "-")</dd>
 </dl>
 
 <form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post">

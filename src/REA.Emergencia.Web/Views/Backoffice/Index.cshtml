@@ -7,17 +7,59 @@
         <h1 class="mb-3">Backoffice</h1>
         <p>Area reservada a utilizadores autenticados com perfil de administrador.</p>
         <div class="list-group">
-            <a asp-controller="TiposPedido" asp-action="Index" class="list-group-item list-group-item-action">
-                Gerir Tipos de Pedido
+            <a asp-controller="TiposPedido" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M9.669.864 8 0 6.331.864l-.762 1.88-2.02.326-.41 1.861 1.38 1.503-.326 2.02L6.073 9l1.927-.893L9.927 9l1.88-.762-.326-2.02 1.38-1.503-.41-1.86-2.02-.327-.762-1.88zM8 5.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/>
+                </svg>
+                <div>
+                    <div>Gerir Tipos de Pedido</div>
+                    <small class="text-muted">Definir tipos, tabelas e workflows.</small>
+                </div>
             </a>
-            <a asp-controller="Distritos" asp-action="Index" class="list-group-item list-group-item-action">
-                Gerir Distritos
+            <a asp-controller="Distritos" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M8.5.134a.5.5 0 0 0-1 0V1h-4A1.5 1.5 0 0 0 2 2.634V14a1 1 0 0 0 1.447.894L6 13.618l2.553 1.276a1 1 0 0 0 .894 0L12 13.618l2.553 1.276A1 1 0 0 0 16 14V2.634A1.5 1.5 0 0 0 14.5 1h-4z"/>
+                </svg>
+                <div>
+                    <div>Gerir Distritos</div>
+                    <small class="text-muted">Manter lista de distritos.</small>
+                </div>
             </a>
-            <a asp-controller="Concelhos" asp-action="Index" class="list-group-item list-group-item-action">
-                Gerir Concelhos
+            <a asp-controller="Concelhos" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.25 11.5H4.75a.75.75 0 0 1 0-1.5h6.5a.75.75 0 0 1 0 1.5zm0-3H4.75a.75.75 0 0 1 0-1.5h6.5a.75.75 0 0 1 0 1.5zm0-3H4.75a.75.75 0 0 1 0-1.5h6.5a.75.75 0 0 1 0 1.5z"/>
+                </svg>
+                <div>
+                    <div>Gerir Concelhos</div>
+                    <small class="text-muted">Associar concelhos a distritos e ZINF.</small>
+                </div>
             </a>
-            <a asp-controller="CodigosPostais" asp-action="Index" class="list-group-item list-group-item-action">
-                Gerir Códigos Postais
+            <a asp-controller="CodigosPostais" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M4 1a2 2 0 0 0-2 2v10h12V3a2 2 0 0 0-2-2H4zm8 2v1H4V3h8zM4 6h8v1H4V6zm0 2h5v1H4V8z"/>
+                </svg>
+                <div>
+                    <div>Gerir Códigos Postais</div>
+                    <small class="text-muted">Consultar e filtrar códigos por distrito/concelho.</small>
+                </div>
+            </a>
+            <a asp-controller="BackofficeUsers" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 14s-1 0-1-1 1-4 7-4 7 3 7 4-1 1-1 1H2z"/>
+                </svg>
+                <div>
+                    <div>Gerir Utilizadores</div>
+                    <small class="text-muted">Atribuir roles Admin e Volunteer.</small>
+                </div>
+            </a>
+            <a asp-controller="BackofficeSettings" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M9.669.864 8 0 6.331.864l-.762 1.88-2.02.326-.41 1.861 1.38 1.503-.326 2.02L6.073 9l1.927-.893L9.927 9l1.88-.762-.326-2.02 1.38-1.503-.41-1.86-2.02-.327-.762-1.88zM8 5.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/>
+                </svg>
+                <div>
+                    <div>Configurações da Aplicação</div>
+                    <small class="text-muted">Definir templates e parâmetros globais.</small>
+                </div>
             </a>
         </div>
     </div>

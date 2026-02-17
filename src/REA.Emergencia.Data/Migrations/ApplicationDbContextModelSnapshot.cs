@@ -22,6 +22,31 @@ namespace REA.Emergencia.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("REA.Emergencia.Domain.AppSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("AppSettings", (string)null);
+                });
+
             modelBuilder.Entity("REA.Emergencia.Domain.CodigoPostal", b =>
                 {
                     b.Property<int>("Numero")
@@ -62,14 +87,15 @@ namespace REA.Emergencia.Data.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasColumnName("Concelho");
 
-                    b.Property<string>("ZINF")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int?>("ZinfId")
+                        .HasColumnType("int")
+                        .HasColumnName("ZINFId");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DistritoId");
+
+                    b.HasIndex("ZinfId");
 
                     b.ToTable("Concelhos", (string)null);
                 });
@@ -109,6 +135,11 @@ namespace REA.Emergencia.Data.Migrations
                     b.Property<int>("ExternalRequestID")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
                     b.Property<string>("State")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -117,9 +148,17 @@ namespace REA.Emergencia.Data.Migrations
                     b.Property<int>("TipoPedidoId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ZinfId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("PublicId")
+                        .IsUnique();
+
                     b.HasIndex("TipoPedidoId");
+
+                    b.HasIndex("ZinfId");
 
                     b.ToTable("Pedidos", (string)null);
                 });
@@ -258,6 +297,43 @@ namespace REA.Emergencia.Data.Migrations
                     b.ToTable("TiposPedido", (string)null);
                 });
 
+            modelBuilder.Entity("REA.Emergencia.Domain.UserZinf", b =>
+                {
+                    b.Property<string>("UserPrincipalName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("ZinfId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserPrincipalName", "ZinfId");
+
+                    b.HasIndex("ZinfId");
+
+                    b.ToTable("UserZinfs", (string)null);
+                });
+
+            modelBuilder.Entity("REA.Emergencia.Domain.Zinf", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Nome")
+                        .IsUnique();
+
+                    b.ToTable("Zinfs", (string)null);
+                });
+
             modelBuilder.Entity("REA.Emergencia.Domain.CodigoPostal", b =>
                 {
                     b.HasOne("REA.Emergencia.Domain.Concelho", "Concelho")
@@ -277,7 +353,14 @@ namespace REA.Emergencia.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("REA.Emergencia.Domain.Zinf", "Zinf")
+                        .WithMany("Concelhos")
+                        .HasForeignKey("ZinfId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Distrito");
+
+                    b.Navigation("Zinf");
                 });
 
             modelBuilder.Entity("REA.Emergencia.Domain.Pedido", b =>
@@ -288,7 +371,25 @@ namespace REA.Emergencia.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("REA.Emergencia.Domain.Zinf", "Zinf")
+                        .WithMany()
+                        .HasForeignKey("ZinfId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("TipoPedido");
+
+                    b.Navigation("Zinf");
+                });
+
+            modelBuilder.Entity("REA.Emergencia.Domain.UserZinf", b =>
+                {
+                    b.HasOne("REA.Emergencia.Domain.Zinf", "Zinf")
+                        .WithMany("UserZinfs")
+                        .HasForeignKey("ZinfId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Zinf");
                 });
 
             modelBuilder.Entity("REA.Emergencia.Domain.Concelho", b =>
@@ -304,6 +405,13 @@ namespace REA.Emergencia.Data.Migrations
             modelBuilder.Entity("REA.Emergencia.Domain.TipoPedido", b =>
                 {
                     b.Navigation("Pedidos");
+                });
+
+            modelBuilder.Entity("REA.Emergencia.Domain.Zinf", b =>
+                {
+                    b.Navigation("Concelhos");
+
+                    b.Navigation("UserZinfs");
                 });
 #pragma warning restore 612, 618
         }

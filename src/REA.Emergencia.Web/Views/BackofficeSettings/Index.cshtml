@@ -1,0 +1,68 @@
+@model REA.Emergencia.Web.Models.AppSettingsViewModel
+
+@{
+    ViewData["Title"] = "Configurações";
+}
+
+<div class="row">
+    <div class="col-lg-10">
+        <h1 class="mb-3">Configurações da Aplicação</h1>
+
+        @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+        {
+            <div class="alert alert-success">@Model.StatusMessage</div>
+        }
+
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="SiteTheme" class="form-label">Tema do site</label>
+                <select asp-for="SiteTheme" asp-items="Model.SiteThemeOptions" class="form-select"></select>
+                <span asp-validation-for="SiteTheme" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="EmailFrom" class="form-label">Email From</label>
+                <input asp-for="EmailFrom" class="form-control" placeholder="no-reply@entrajuda.pt" />
+                <span asp-validation-for="EmailFrom" class="text-danger"></span>
+                <div class="form-text">Remetente usado para envio de emails via Microsoft Graph.</div>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="SendEmailToPedidoCreator" class="form-check-input" />
+                <label asp-for="SendEmailToPedidoCreator" class="form-check-label">
+                    Enviar email ao utilizador que submete o pedido
+                </label>
+                <div class="form-text">Se desativado, não é enviado email de confirmação ao requerente.</div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <label asp-for="PedidoBensEmailTemplate" class="form-label mb-0">Email enviado após submissão de pedido</label>
+                    <a asp-action="EmailTemplate" asp-route-settingKey="@REA.Emergencia.Web.Models.AppSettingKeys.PedidoBensEmailTemplate" class="btn btn-sm btn-outline-primary">Editar no compositor</a>
+                </div>
+                <textarea asp-for="PedidoBensEmailTemplate" class="form-control" rows="8"></textarea>
+                <span asp-validation-for="PedidoBensEmailTemplate" class="text-danger"></span>
+                <div class="form-text">Use <code>{GuidPedido}</code> para inserir automaticamente o identificador público do pedido.</div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <label asp-for="NovoPedidolTemplate" class="form-label mb-0">Email para novo pedido (utilizadores da ZINF)</label>
+                    <a asp-action="EmailTemplate" asp-route-settingKey="@REA.Emergencia.Web.Models.AppSettingKeys.NovoPedidolTemplate" class="btn btn-sm btn-outline-primary">Editar no compositor</a>
+                </div>
+                <textarea asp-for="NovoPedidolTemplate" class="form-control" rows="8"></textarea>
+                <span asp-validation-for="NovoPedidolTemplate" class="text-danger"></span>
+                <div class="form-text">Template HTML usado para notificar utilizadores associados à ZINF do pedido.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a asp-controller="Backoffice" asp-action="Index" class="btn btn-outline-secondary ms-2">Voltar</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

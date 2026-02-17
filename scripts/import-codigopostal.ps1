@@ -2,7 +2,12 @@ param(
     [string]$CsvPath = ".\codigopostal.csv",
     [string]$ConnectionString = "",
     [switch]$DetailedLog,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$OnlyStartWith9,
+    [switch]$CompareOnly,
+    [string]$SourceConnectionString = "",
+    [string]$SourceTable = "CodigosPostais",
+    [string]$TargetTable = "CodigosPostais"
 )
 
 $ErrorActionPreference = "Stop"
@@ -60,6 +65,52 @@ function Normalize-Text {
     }
 
     return $sb.ToString().Normalize([Text.NormalizationForm]::FormC).ToUpperInvariant()
+}
+
+function Get-SafeQualifiedTableName {
+    param([string]$TableName)
+
+    if ([string]::IsNullOrWhiteSpace($TableName)) {
+        throw "Nome de tabela vazio."
+    }
+
+    $trimmed = $TableName.Trim()
+    if ($trimmed -notmatch '^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$') {
+        throw "Nome de tabela invalido: '$TableName'. Use 'Tabela' ou 'Schema.Tabela'."
+    }
+
+    if ($trimmed.Contains('.')) {
+        $parts = $trimmed.Split('.', 2)
+        return "[$($parts[0])].[$($parts[1])]"
+    }
+
+    return "[dbo].[$trimmed]"
+}
+
+function Read-CodigosPostaisTable {
+    param(
+        [System.Data.SqlClient.SqlConnection]$Connection,
+        [string]$QualifiedTableName
+    )
+
+    $cmd = $Connection.CreateCommand()
+    $cmd.CommandText = "SELECT Numero, Freguesia, ConcelhoId FROM $QualifiedTableName"
+    $reader = $cmd.ExecuteReader()
+
+    $map = @{}
+    while ($reader.Read()) {
+        $numero = $reader.GetInt32(0)
+        $freguesia = if ($reader.IsDBNull(1)) { "" } else { $reader.GetString(1) }
+        $concelhoId = if ($reader.IsDBNull(2)) { -1 } else { $reader.GetInt32(2) }
+        $map[$numero] = [pscustomobject]@{
+            Numero = $numero
+            Freguesia = $freguesia
+            ConcelhoId = $concelhoId
+        }
+    }
+    $reader.Close()
+
+    return $map
 }
 
 function Read-CsvRows {
@@ -132,6 +183,94 @@ if ([string]::IsNullOrWhiteSpace($ConnectionString)) {
     Log-Info "Connection string recebida por parametro"
 }
 
+if ($CompareOnly) {
+    if ([string]::IsNullOrWhiteSpace($SourceConnectionString)) {
+        $SourceConnectionString = Get-ConnectionStringFromAppSettings -RepoRoot $repoRoot
+    }
+
+    if ([string]::IsNullOrWhiteSpace($ConnectionString)) {
+        $ConnectionString = $SourceConnectionString
+    }
+
+    $qualifiedSourceTable = Get-SafeQualifiedTableName -TableName $SourceTable
+    $qualifiedTargetTable = Get-SafeQualifiedTableName -TableName $TargetTable
+
+    Log-Info "Modo CompareOnly ativo."
+    Log-Info "Origem: $qualifiedSourceTable"
+    Log-Info "Destino: $qualifiedTargetTable"
+
+    $sourceConnection = [System.Data.SqlClient.SqlConnection]::new($SourceConnectionString)
+    $targetConnection = [System.Data.SqlClient.SqlConnection]::new($ConnectionString)
+
+    try {
+        Log-Info "A abrir ligacao SQL origem..."
+        $sourceConnection.Open()
+        Log-Info "A abrir ligacao SQL destino..."
+        $targetConnection.Open()
+
+        $sourceMap = Read-CodigosPostaisTable -Connection $sourceConnection -QualifiedTableName $qualifiedSourceTable
+        $targetMap = Read-CodigosPostaisTable -Connection $targetConnection -QualifiedTableName $qualifiedTargetTable
+
+        Log-Info "Registos origem: $($sourceMap.Count)"
+        Log-Info "Registos destino: $($targetMap.Count)"
+
+        $missingInTarget = New-Object System.Collections.Generic.List[object]
+        $differentValues = New-Object System.Collections.Generic.List[object]
+
+        foreach ($numero in $sourceMap.Keys) {
+            if (-not $targetMap.ContainsKey($numero)) {
+                $missingInTarget.Add($sourceMap[$numero])
+                continue
+            }
+
+            $src = $sourceMap[$numero]
+            $dst = $targetMap[$numero]
+
+            if ($src.Freguesia -ne $dst.Freguesia -or $src.ConcelhoId -ne $dst.ConcelhoId) {
+                $differentValues.Add([pscustomobject]@{
+                    Numero = $numero
+                    SourceFreguesia = $src.Freguesia
+                    TargetFreguesia = $dst.Freguesia
+                    SourceConcelhoId = $src.ConcelhoId
+                    TargetConcelhoId = $dst.ConcelhoId
+                })
+            }
+        }
+
+        Write-Host "Resumo CompareOnly:"
+        Write-Host " - Em falta no destino: $($missingInTarget.Count)"
+        Write-Host " - Com valores diferentes: $($differentValues.Count)"
+
+        if ($missingInTarget.Count -gt 0) {
+            Write-Host ""
+            Log-Warn "Top 200 registos em falta no destino:"
+            $missingInTarget | Select-Object -First 200 | ForEach-Object {
+                Write-Host (" - Numero={0}, Freguesia='{1}', ConcelhoId={2}" -f $_.Numero, $_.Freguesia, $_.ConcelhoId)
+            }
+        }
+
+        if ($differentValues.Count -gt 0) {
+            Write-Host ""
+            Log-Warn "Top 200 registos com diferencas:"
+            $differentValues | Select-Object -First 200 | ForEach-Object {
+                Write-Host (" - Numero={0}, Origem(Freguesia='{1}', ConcelhoId={2}) vs Destino(Freguesia='{3}', ConcelhoId={4})" -f $_.Numero, $_.SourceFreguesia, $_.SourceConcelhoId, $_.TargetFreguesia, $_.TargetConcelhoId)
+            }
+        }
+    }
+    finally {
+        if ($sourceConnection.State -eq [System.Data.ConnectionState]::Open) {
+            $sourceConnection.Close()
+        }
+        if ($targetConnection.State -eq [System.Data.ConnectionState]::Open) {
+            $targetConnection.Close()
+        }
+        $sourceConnection.Dispose()
+        $targetConnection.Dispose()
+    }
+
+    exit 0
+}
+
 $rows = Read-CsvRows -Path $resolvedCsvPath
 if ($rows.Count -eq 0) {
     Log-Warn "CSV vazio. Nada a importar."
@@ -155,6 +294,7 @@ $processed = 0
 $skippedByReason = @{
     "NumeroInvalido" = 0
     "NumeroForaIntervalo" = 0
+    "NumeroNaoComecaPor9" = 0
     "CamposObrigatoriosVazios" = 0
     "ConcelhoNaoEncontrado" = 0
     "CodigoPostalJaExiste" = 0
@@ -219,6 +359,14 @@ try {
             $skippedByReason["NumeroForaIntervalo"]++
             [void]$distinctErrors.Add("NumeroForaIntervalo")
             Log-Warn "Linha $processed ignorada: numero fora do intervalo [1000000..9999999] (valor: $numero)."
+            continue
+        }
+
+        if ($OnlyStartWith9 -and -not $numeroRaw.Trim().StartsWith("9")) {
+            $skipped++
+            $skippedByReason["NumeroNaoComecaPor9"]++
+            [void]$distinctErrors.Add("NumeroNaoComecaPor9")
+            Log-Debug "Linha $processed ignorada: cod_postal nao comeca por 9 ('$numeroRaw')."
             continue
         }
 
@@ -306,6 +454,7 @@ VALUES (@Numero, @Freguesia, @ConcelhoId)
     Write-Host " - Ignorados por motivo:"
     Write-Host "   * Numero invalido: $($skippedByReason["NumeroInvalido"])"
     Write-Host "   * Numero fora do intervalo [1000000..9999999]: $($skippedByReason["NumeroForaIntervalo"])"
+    Write-Host "   * Numero nao comeca por 9: $($skippedByReason["NumeroNaoComecaPor9"])"
     Write-Host "   * Freguesia/Concelho vazio: $($skippedByReason["CamposObrigatoriosVazios"])"
     Write-Host "   * Concelho nao encontrado: $($skippedByReason["ConcelhoNaoEncontrado"])"
     Write-Host "   * Codigo postal ja existe: $($skippedByReason["CodigoPostalJaExiste"])"

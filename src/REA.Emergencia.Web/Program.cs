@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using REA.Emergencia.Data;
 using REA.Emergencia.Web.Models;
+using REA.Emergencia.Web.Options;
+using REA.Emergencia.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +38,13 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("Admin");
     });
 });
+
+builder.Services.Configure<AzureAdRoleManagementOptions>(builder.Configuration.GetSection("AzureAdRoleManagement"));
+builder.Services.Configure<GraphMailOptions>(builder.Configuration.GetSection("GraphMail"));
+
+builder.Services.AddScoped<IAzureAdRoleManagementService, AzureAdRoleManagementService>();
+builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
+builder.Services.AddScoped<IRequestNotificationEmailService, RequestNotificationEmailService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {

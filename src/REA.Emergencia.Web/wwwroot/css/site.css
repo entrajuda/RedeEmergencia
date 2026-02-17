@@ -23,7 +23,6 @@ body {
 
 .site-header-image {
   width: 20%;
-  background-color: #ffffff;
   margin: 0 auto;
   text-align: center;
 }
@@ -55,4 +54,48 @@ body {
   border-radius: 8px;
   padding: 12px;
   overflow-x: auto;
+}
+
+.backoffice-index-page {
+  background-color: #1523F5;
+  color: #ffffff;
+}
+
+.backoffice-index-page .text-muted {
+  color: #d7dcff !important;
+}
+
+.backoffice-index-page .list-group-item {
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.backoffice-navbar {
+  background-color: #1523F5 !important;
+}
+
+.backoffice-navbar .nav-link,
+.backoffice-navbar .navbar-brand {
+  color: #ffffff !important;
+}
+
+.backoffice-navbar .btn-outline-secondary {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+body.backoffice-area {
+  background-color: #1523F5;
+  color: #ffffff;
+}
+
+body.backoffice-area .container,
+body.backoffice-area main {
+  background-color: transparent;
+}
+
+body.backoffice-area .footer,
+body.backoffice-area footer {
+  background-color: #1523F5;
+  color: #d7dcff !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
 }

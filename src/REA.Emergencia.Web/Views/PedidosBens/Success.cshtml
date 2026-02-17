@@ -1,11 +1,20 @@
 @{
     ViewData["Title"] = "Pedido submetido";
+    var publicId = ViewData["PublicId"] as Guid?;
 }
 
 <div class="row">
     <div class="col-lg-8">
         <h1 class="mb-3">Pedido submetido</h1>
         <p>Obrigado. O seu pedido foi registado com sucesso.</p>
+        @if (publicId.HasValue)
+        {
+            <p class="mb-1"><strong>Código do pedido:</strong> @publicId.Value</p>
+            <p>
+                Acompanhe o estado do seu pedido em:
+                <a asp-action="EstadoPedido" asp-route-publicId="@publicId.Value">ver estado do pedido</a>.
+            </p>
+        }
         <a asp-action="ApoioBens" class="btn btn-outline-primary">Submeter outro pedido</a>
     </div>
 </div>

@@ -7,6 +7,8 @@ public sealed class PedidosIndexViewModel
     public int? TipoPedidoId { get; set; }
     public IReadOnlyList<SelectListItem> TipoPedidoOptions { get; set; } = Array.Empty<SelectListItem>();
     public IReadOnlyList<PedidoListItemViewModel> Pedidos { get; set; } = Array.Empty<PedidoListItemViewModel>();
+    public bool IsAdmin { get; set; }
+    public IReadOnlyList<string> AccessibleZinfs { get; set; } = Array.Empty<string>();
 }
 
 public sealed class PedidoListItemViewModel
@@ -17,4 +19,5 @@ public sealed class PedidoListItemViewModel
     public int ExternalRequestID { get; set; }
     public int TipoPedidoId { get; set; }
     public string TipoPedidoName { get; set; } = string.Empty;
+    public string ZinfName { get; set; } = string.Empty;
 }

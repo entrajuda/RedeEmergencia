@@ -26,7 +26,7 @@
                 <td>@item.Id</td>
                 <td>@item.Nome</td>
                 <td>@item.Distrito.Nome</td>
-                <td>@item.ZINF</td>
+                <td>@(item.Zinf?.Nome ?? "-")</td>
                 <td class="text-end">
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Editar</a>
                     <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>

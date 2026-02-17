@@ -24,9 +24,11 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="ZINF" class="form-label">ZINF</label>
-        <input asp-for="ZINF" class="form-control" />
-        <span asp-validation-for="ZINF" class="text-danger"></span>
+        <label asp-for="ZinfId" class="form-label">ZINF</label>
+        <select asp-for="ZinfId" asp-items="ViewBag.Zinfs" class="form-select">
+            <option value="">Selecione...</option>
+        </select>
+        <span asp-validation-for="ZinfId" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Gravar</button>

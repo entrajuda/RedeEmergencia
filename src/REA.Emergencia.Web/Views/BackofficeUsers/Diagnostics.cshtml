@@ -1,0 +1,50 @@
+@model REA.Emergencia.Web.Services.AzureAdRoleDiagnosticsResult
+
+@{
+    ViewData["Title"] = "Diagnóstico Azure Roles";
+}
+
+<div class="row">
+    <div class="col-lg-10">
+        <h1 class="mb-3">Diagnóstico Azure Roles</h1>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="mb-1"><strong>TenantId:</strong> @Model.TenantId</p>
+                <p class="mb-1"><strong>ClientId:</strong> @Model.ClientId</p>
+                <p class="mb-0"><strong>TargetAppId:</strong> @Model.TargetAppId</p>
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Check</th>
+                    <th>Estado</th>
+                    <th>Detalhe</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var check in Model.Checks)
+                {
+                    <tr>
+                        <td>@check.Name</td>
+                        <td>
+                            @if (check.Success)
+                            {
+                                <span class="badge bg-success">OK</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Falhou</span>
+                            }
+                        </td>
+                        <td>@check.Message</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <a asp-controller="BackofficeUsers" asp-action="Index" class="btn btn-outline-secondary">Voltar a Utilizadores</a>
+    </div>
+</div>

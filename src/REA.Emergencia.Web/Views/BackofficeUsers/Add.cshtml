@@ -1,0 +1,66 @@
+@model REA.Emergencia.Web.Models.BackofficeUsersAddViewModel
+
+@{
+    ViewData["Title"] = "Adicionar Utilizador";
+}
+
+<div class="row">
+    <div class="col-lg-10">
+        <div class="mb-3">
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Voltar à gestão de utilizadores</a>
+        </div>
+
+        <h1 class="mb-3">Adicionar Utilizador</h1>
+        <p class="text-muted">Atribua os App Roles <strong>Admin</strong> e <strong>Volunteer</strong> a um utilizador.</p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+        {
+            <div class="alert alert-success">@Model.StatusMessage</div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+        @if (Model.OperationLogs.Any())
+        {
+            <div class="alert alert-secondary">
+                <strong>Log da operação</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach (var log in Model.OperationLogs)
+                    {
+                        <li>@log</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <div class="card mb-4">
+            <div class="card-header">Atribuir/Atualizar perfis</div>
+            <div class="card-body">
+                <form asp-action="Assign" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="mb-3">
+                        <label asp-for="AssignInput.UserPrincipalName" class="form-label">Utilizador</label>
+                        <select asp-for="AssignInput.UserPrincipalName" asp-items="Model.DirectoryUserOptions" class="form-select"></select>
+                        <span asp-validation-for="AssignInput.UserPrincipalName" class="text-danger"></span>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input asp-for="AssignInput.IsAdmin" class="form-check-input" />
+                        <label asp-for="AssignInput.IsAdmin" class="form-check-label">Admin</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input asp-for="AssignInput.IsVolunteer" class="form-check-input" />
+                        <label asp-for="AssignInput.IsVolunteer" class="form-check-label">Volunteer</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar perfis</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,19 +1,35 @@
 ﻿<!DOCTYPE html>
+@inject REA.Emergencia.Web.Services.IAppSettingsService AppSettingsService
 <html lang="pt-PT">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Rede Emergência</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @{
+        var selectedTheme = await AppSettingsService.GetValueAsync(REA.Emergencia.Web.Models.AppSettingKeys.SiteTheme, Context.RequestAborted);
+        var bootstrapThemeUrl = REA.Emergencia.Web.Models.AppThemeCatalog.ResolveThemeUrl(selectedTheme);
+        var isExternalTheme = bootstrapThemeUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || bootstrapThemeUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+    }
+    @if (isExternalTheme)
+    {
+        <link rel="stylesheet" href="@bootstrapThemeUrl" />
+    }
+    else
+    {
+        <link rel="stylesheet" href="@bootstrapThemeUrl" asp-append-version="true" />
+    }
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/REA.Emergencia.Web.styles.css" asp-append-version="true" />
 </head>
+@{
+    var isBackoffice = Context.Request.Path.StartsWithSegments("/backoffice");
+    var isEncaminhamento = Context.Request.Path.StartsWithSegments("/encaminhamento");
+    var isInternalArea = isBackoffice || isEncaminhamento;
+    var isBackofficeHome = Context.Request.Path.Equals("/backoffice", StringComparison.OrdinalIgnoreCase)
+        || Context.Request.Path.Equals("/backoffice/", StringComparison.OrdinalIgnoreCase);
+}
 <body>
-    @{
-        var isBackoffice = Context.Request.Path.StartsWithSegments("/backoffice");
-        var isEncaminhamento = Context.Request.Path.StartsWithSegments("/encaminhamento");
-        var isInternalArea = isBackoffice || isEncaminhamento;
-    }
     <header>
         @if (!isInternalArea)
         {
@@ -73,10 +89,29 @@
                     </ul>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <form asp-controller="Account" asp-action="SignOutUser" method="post" class="d-flex">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-secondary btn-sm">Terminar sessão</button>
-                        </form>
+                        var displayName =
+                            User.FindFirst("name")?.Value
+                            ?? User.Identity?.Name
+                            ?? "Utilizador autenticado";
+
+                        var userUpn =
+                            User.FindFirst("preferred_username")?.Value
+                            ?? User.FindFirst("upn")?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+                            ?? string.Empty;
+
+                        var userLabel = !string.IsNullOrWhiteSpace(userUpn) &&
+                                        !string.Equals(displayName, userUpn, StringComparison.OrdinalIgnoreCase)
+                            ? $"{displayName} ({userUpn})"
+                            : displayName;
+
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted small">@userLabel</span>
+                            <form asp-controller="Account" asp-action="SignOutUser" method="post" class="d-flex">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Terminar sessão</button>
+                            </form>
+                        </div>
                     }
                 </div>
             </nav>
@@ -84,6 +119,12 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            @if (isBackoffice && !isBackofficeHome)
+            {
+                <div class="mb-3">
+                    <a asp-controller="Backoffice" asp-action="Index" class="btn btn-outline-secondary">Voltar ao Backoffice</a>
+                </div>
+            }
             @RenderBody()
         </main>
     </div>

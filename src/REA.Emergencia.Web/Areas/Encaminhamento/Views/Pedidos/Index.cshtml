@@ -6,6 +6,27 @@
 
 <h1 class="mb-3">Pedidos</h1>
 
+@if (Model.IsAdmin)
+{
+    <div class="alert alert-info">
+        É administrador e pode ver pedidos de todas as ZINFs.
+    </div>
+}
+else
+{
+    <div class="alert alert-secondary">
+        <strong>ZINFs com acesso:</strong>
+        @if (Model.AccessibleZinfs.Any())
+        {
+            @string.Join(", ", Model.AccessibleZinfs)
+        }
+        else
+        {
+            <span>Sem ZINFs atribuídas.</span>
+        }
+    </div>
+}
+
 <form method="get" class="row g-3 align-items-end mb-3">
     <div class="col-md-5">
         <label for="tipoPedidoId" class="form-label">Tipo de Pedido</label>
@@ -26,6 +47,7 @@
             <th>Estado</th>
             <th>Pedido</th>
             <th>Tipo de Pedido</th>
+            <th>ZINF</th>
         </tr>
     </thead>
     <tbody>
@@ -39,7 +61,23 @@
                     <a asp-area="Encaminhamento" asp-controller="Pedidos" asp-action="Details" asp-route-id="@pedido.Id">Ver detalhes</a>
                 </td>
                 <td>@pedido.TipoPedidoName</td>
+                <td>@pedido.ZinfName</td>
             </tr>
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+        (() => {
+            const tipoPedidoSelect = document.getElementById("tipoPedidoId");
+            if (!tipoPedidoSelect) {
+                return;
+            }
+
+            tipoPedidoSelect.addEventListener("change", () => {
+                tipoPedidoSelect.form?.submit();
+            });
+        })();
+    </script>
+}

@@ -14,9 +14,9 @@ public sealed class Concelho
 
     public Distrito Distrito { get; set; } = null!;
 
-    [Required]
-    [MaxLength(100)]
-    public string ZINF { get; set; } = string.Empty;
+    public int? ZinfId { get; set; }
+
+    public Zinf? Zinf { get; set; }
 
     public ICollection<CodigoPostal> CodigosPostais { get; set; } = new List<CodigoPostal>();
 }

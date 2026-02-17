@@ -1,0 +1,134 @@
+@model REA.Emergencia.Web.Models.EmailTemplateComposerViewModel
+
+@{
+    ViewData["Title"] = "Compositor de Email";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-1">Compositor de Email</h1>
+        <p class="text-muted mb-3">
+            A editar: <strong>@Model.SettingLabel</strong>
+            <span class="ms-2 badge text-bg-light border">@Model.SettingKey</span>
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+        {
+            <div class="alert alert-success">@Model.StatusMessage</div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-2 d-flex flex-wrap gap-2" role="toolbar" aria-label="Ferramentas de edição">
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-cmd="bold"><strong>B</strong></button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-cmd="italic"><em>I</em></button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-cmd="underline"><u>U</u></button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-insert="<br>">Quebra de linha</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-insert="<p></p>">Parágrafo</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-insert="<ul><li></li></ul>">Lista</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-insert="{GuidPedido}">{GuidPedido}</button>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <form asp-action="SaveEmailTemplate" method="post" id="saveTemplateForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="SettingKey" />
+                    <input type="hidden" asp-for="SettingLabel" />
+                    <label asp-for="TemplateHtml" class="form-label">Composição HTML</label>
+                    <textarea asp-for="TemplateHtml" class="form-control" rows="20" id="templateHtmlEditor"></textarea>
+                    <span asp-validation-for="TemplateHtml" class="text-danger"></span>
+
+                    <div class="mt-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Guardar template</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Voltar</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-lg-6">
+                <label class="form-label">Pré-visualização renderizada</label>
+                <div id="templatePreview" class="border rounded p-3 bg-white" style="min-height: 420px;"></div>
+
+                <form asp-action="SendTestEmail" method="post" class="mt-3" id="sendTestForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="SettingKey" />
+                    <input type="hidden" asp-for="SettingLabel" />
+                    <input type="hidden" name="TemplateHtml" id="templateHtmlForTest" value="@Model.TemplateHtml" />
+                    <div class="mb-2">
+                        <label asp-for="TestEmail" class="form-label">Enviar teste para</label>
+                        <input asp-for="TestEmail" class="form-control" placeholder="email@dominio.pt" />
+                        <span asp-validation-for="TestEmail" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">Enviar email de teste</button>
+                    <div class="form-text">Assunto: <strong>Email de testes Rede Emergência</strong></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const editor = document.getElementById("templateHtmlEditor");
+            const preview = document.getElementById("templatePreview");
+            const testHidden = document.getElementById("templateHtmlForTest");
+            const toolbar = document.querySelectorAll("[data-cmd], [data-insert]");
+
+            if (!editor || !preview || !testHidden) {
+                return;
+            }
+
+            const syncPreview = () => {
+                preview.innerHTML = editor.value || "";
+                testHidden.value = editor.value || "";
+            };
+
+            const wrapSelection = (openTag, closeTag) => {
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                const value = editor.value;
+                const selected = value.substring(start, end);
+                const replacement = `${openTag}${selected}${closeTag}`;
+                editor.value = value.substring(0, start) + replacement + value.substring(end);
+                editor.focus();
+                const pos = start + replacement.length;
+                editor.setSelectionRange(pos, pos);
+                syncPreview();
+            };
+
+            const insertAtCursor = (text) => {
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                const value = editor.value;
+                editor.value = value.substring(0, start) + text + value.substring(end);
+                editor.focus();
+                const pos = start + text.length;
+                editor.setSelectionRange(pos, pos);
+                syncPreview();
+            };
+
+            toolbar.forEach((button) => {
+                button.addEventListener("click", () => {
+                    const cmd = button.getAttribute("data-cmd");
+                    const insert = button.getAttribute("data-insert");
+
+                    if (cmd === "bold") wrapSelection("<strong>", "</strong>");
+                    if (cmd === "italic") wrapSelection("<em>", "</em>");
+                    if (cmd === "underline") wrapSelection("<u>", "</u>");
+                    if (insert) insertAtCursor(insert);
+                });
+            });
+
+            editor.addEventListener("input", syncPreview);
+            syncPreview();
+        })();
+    </script>
+}

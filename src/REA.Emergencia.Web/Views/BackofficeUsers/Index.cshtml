@@ -1,0 +1,100 @@
+@model REA.Emergencia.Web.Models.BackofficeUsersIndexViewModel
+
+@{
+    ViewData["Title"] = "Gestão de Utilizadores";
+}
+
+<div class="row">
+    <div class="col-lg-10">
+        <h1 class="mb-3">Gestão de Utilizadores</h1>
+        <p class="text-muted">Atribua os App Roles <strong>Admin</strong> e <strong>Volunteer</strong> a utilizadores no Azure Entra ID.</p>
+        <p>
+            <a asp-action="Diagnostics" class="btn btn-sm btn-outline-secondary">Abrir diagnóstico de permissões</a>
+            <a asp-action="Add" class="btn btn-sm btn-primary">Adicionar utilizador</a>
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+        {
+            <div class="alert alert-success">@Model.StatusMessage</div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+        @if (Model.OperationLogs.Any())
+        {
+            <div class="alert alert-secondary">
+                <strong>Log da operação</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach (var log in Model.OperationLogs)
+                    {
+                        <li>@log</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h2 class="h5 mb-0">Utilizadores com perfis atribuídos</h2>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary" title="Atualizar lista">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M8 3a5 5 0 0 1 4.546 2.916.5.5 0 1 0 .908-.417A6 6 0 1 0 14 8h-1a5 5 0 1 1-5-5z"/>
+                    <path d="M8 1.5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 13 2.5v3a.5.5 0 0 1-1 0V2.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                Atualizar
+            </a>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email/UPN</th>
+                    <th>Admin</th>
+                    <th>Volunteer</th>
+                    <th>Total ZINFs</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Users.Any())
+                {
+                    <tr>
+                        <td colspan="6">Sem utilizadores com perfis atribuídos.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td>@user.UserDisplayName</td>
+                            <td>@user.UserPrincipalName</td>
+                            <td>@(user.IsAdmin ? "Sim" : "Não")</td>
+                            <td>@(user.IsVolunteer ? "Sim" : "Não")</td>
+                            <td>@user.TotalZinfs</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a asp-action="ManageZinfs"
+                                       asp-route-userPrincipalName="@user.UserPrincipalName"
+                                       class="btn btn-sm btn-outline-primary">Gerir ZINFs</a>
+
+                                    <form asp-action="RemoveUserRoles" method="post" onsubmit="return confirm('Remover todos os perfis deste utilizador nesta aplicação?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userPrincipalName" value="@user.UserPrincipalName" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Remover perfis</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

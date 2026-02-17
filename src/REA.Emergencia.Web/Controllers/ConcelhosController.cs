@@ -25,6 +25,7 @@ public sealed class ConcelhosController : Controller
         var items = await _dbContext.Concelhos
             .AsNoTracking()
             .Include(x => x.Distrito)
+            .Include(x => x.Zinf)
             .OrderBy(x => x.Nome)
             .ToListAsync(cancellationToken);
 
@@ -35,6 +36,7 @@ public sealed class ConcelhosController : Controller
     public async Task<IActionResult> Create(CancellationToken cancellationToken)
     {
         await LoadDistritosAsync(cancellationToken);
+        await LoadZinfsAsync(cancellationToken);
         return View(new ConcelhoFormModel());
     }
 
@@ -45,6 +47,7 @@ public sealed class ConcelhosController : Controller
         if (!ModelState.IsValid)
         {
             await LoadDistritosAsync(cancellationToken);
+            await LoadZinfsAsync(cancellationToken);
             return View(model);
         }
 
@@ -52,7 +55,7 @@ public sealed class ConcelhosController : Controller
         {
             Nome = model.Concelho.Trim(),
             DistritoId = model.DistritoId,
-            ZINF = model.ZINF.Trim()
+            ZinfId = model.ZinfId
         };
 
         _dbContext.Concelhos.Add(entity);
@@ -73,10 +76,11 @@ public sealed class ConcelhosController : Controller
         {
             Concelho = entity.Nome,
             DistritoId = entity.DistritoId,
-            ZINF = entity.ZINF
+            ZinfId = entity.ZinfId ?? 0
         };
 
         await LoadDistritosAsync(cancellationToken);
+        await LoadZinfsAsync(cancellationToken);
         return View(model);
     }
 
@@ -87,6 +91,7 @@ public sealed class ConcelhosController : Controller
         if (!ModelState.IsValid)
         {
             await LoadDistritosAsync(cancellationToken);
+            await LoadZinfsAsync(cancellationToken);
             return View(model);
         }
 
@@ -98,7 +103,7 @@ public sealed class ConcelhosController : Controller
 
         entity.Nome = model.Concelho.Trim();
         entity.DistritoId = model.DistritoId;
-        entity.ZINF = model.ZINF.Trim();
+        entity.ZinfId = model.ZinfId;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         return RedirectToAction(nameof(Index));
@@ -110,6 +115,7 @@ public sealed class ConcelhosController : Controller
         var entity = await _dbContext.Concelhos
             .AsNoTracking()
             .Include(x => x.Distrito)
+            .Include(x => x.Zinf)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -147,5 +153,20 @@ public sealed class ConcelhosController : Controller
             .ToListAsync(cancellationToken);
 
         ViewBag.Distritos = items;
+    }
+
+    private async Task LoadZinfsAsync(CancellationToken cancellationToken)
+    {
+        var items = await _dbContext.Zinfs
+            .AsNoTracking()
+            .OrderBy(x => x.Nome)
+            .Select(x => new SelectListItem
+            {
+                Value = x.Id.ToString(),
+                Text = x.Nome
+            })
+            .ToListAsync(cancellationToken);
+
+        ViewBag.Zinfs = items;
     }
 }
