@@ -1,0 +1,41 @@
+@model REA.Emergencia.Web.Models.EmailLogsIndexViewModel
+
+@{
+    ViewData["Title"] = "Logs de Emails";
+}
+
+<h1 class="mb-3">Logs de Emails</h1>
+
+<form asp-action="Clear" method="post" class="mb-3" onsubmit="return confirm('Tem a certeza que pretende apagar todos os logs de emails?');">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-outline-danger">Apagar todos os logs</button>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Data (UTC)</th>
+            <th>Destinatários</th>
+            <th>Assunto</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Logs.Any())
+        {
+            <tr>
+                <td colspan="3">Sem emails enviados.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var log in Model.Logs)
+            {
+                <tr>
+                    <td>@log.SentAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@log.Recipients</td>
+                    <td>@log.Subject</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

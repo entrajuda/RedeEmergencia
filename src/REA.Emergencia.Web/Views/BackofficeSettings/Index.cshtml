@@ -29,16 +29,20 @@
                 <div class="form-text">Remetente usado para envio de emails via Microsoft Graph.</div>
             </div>
 
-            <div class="form-check mb-3">
-                <input asp-for="SendEmailToPedidoCreator" class="form-check-input" />
-                <label asp-for="SendEmailToPedidoCreator" class="form-check-label">
-                    Enviar email ao utilizador que submete o pedido
-                </label>
-                <div class="form-text">Se desativado, não é enviado email de confirmação ao requerente.</div>
+            <div class="mb-3">
+                <div class="form-check mb-2">
+                    <input asp-for="EmailDryRunEnabled" class="form-check-input" />
+                    <label asp-for="EmailDryRunEnabled" class="form-check-label">DryRun de emails</label>
+                </div>
+                <label asp-for="EmailDryRunRecipient" class="form-label">Email destino DryRun</label>
+                <input asp-for="EmailDryRunRecipient" class="form-control" placeholder="qa@entrajuda.pt" />
+                <span asp-validation-for="EmailDryRunRecipient" class="text-danger"></span>
+                <div class="form-text">Quando ativo, todos os emails são enviados para este endereço.</div>
             </div>
 
             <div class="mb-3">
                 <div class="d-flex align-items-center gap-2">
+                    <input asp-for="SendEmailToPedidoCreator" class="form-check-input mt-0" />
                     <label asp-for="PedidoBensEmailTemplate" class="form-label mb-0">Email enviado após submissão de pedido</label>
                     <a asp-action="EmailTemplate" asp-route-settingKey="@REA.Emergencia.Web.Models.AppSettingKeys.PedidoBensEmailTemplate" class="btn btn-sm btn-outline-primary">Editar no compositor</a>
                 </div>
@@ -49,12 +53,14 @@
 
             <div class="mb-3">
                 <div class="d-flex align-items-center gap-2">
+                    <input asp-for="SendNovoPedidoEmailToZinfUsers" class="form-check-input mt-0" />
                     <label asp-for="NovoPedidolTemplate" class="form-label mb-0">Email para novo pedido (utilizadores da ZINF)</label>
                     <a asp-action="EmailTemplate" asp-route-settingKey="@REA.Emergencia.Web.Models.AppSettingKeys.NovoPedidolTemplate" class="btn btn-sm btn-outline-primary">Editar no compositor</a>
                 </div>
                 <textarea asp-for="NovoPedidolTemplate" class="form-control" rows="8"></textarea>
                 <span asp-validation-for="NovoPedidolTemplate" class="text-danger"></span>
                 <div class="form-text">Template HTML usado para notificar utilizadores associados à ZINF do pedido.</div>
+                <div class="form-text">Use <code>{GuidPedido}</code> para inserir automaticamente o identificador público do pedido.</div>
             </div>
 
             <button type="submit" class="btn btn-primary">Guardar</button>

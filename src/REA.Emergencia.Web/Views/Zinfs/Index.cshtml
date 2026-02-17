@@ -1,0 +1,51 @@
+@model REA.Emergencia.Web.Models.ZinfsIndexViewModel
+
+@{
+    ViewData["Title"] = "Zonas de Influência";
+}
+
+<h1 class="mb-3">Zonas de Influência (ZINFs)</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>ZINF</th>
+            <th>Utilizadores atribuídos</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Zinfs.Any())
+        {
+            <tr>
+                <td colspan="4">Sem ZINFs configuradas.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var zinf in Model.Zinfs)
+            {
+                <tr>
+                    <td>@zinf.Id</td>
+                    <td>@zinf.Nome</td>
+                    <td>
+                        @if (!zinf.AssignedUsers.Any())
+                        {
+                            <span>-</span>
+                        }
+                        else
+                        {
+                            @string.Join(", ", zinf.AssignedUsers)
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Instituicoes" asp-route-id="@zinf.Id" class="btn btn-sm btn-outline-primary">
+                            Ver instituições
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

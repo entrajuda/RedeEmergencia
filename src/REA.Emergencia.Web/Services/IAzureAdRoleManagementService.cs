@@ -4,6 +4,7 @@ public interface IAzureAdRoleManagementService
 {
     Task<IReadOnlyList<AzureAdUserRoleAssignment>> GetManagedUserAssignmentsAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<AzureAdDirectoryUser>> GetDirectoryUsersAsync(CancellationToken cancellationToken);
+    Task<string?> ResolveUserEmailAsync(string userPrincipalName, CancellationToken cancellationToken);
     Task AssignRolesAsync(string userPrincipalName, bool isAdmin, bool isVolunteer, CancellationToken cancellationToken);
     Task RemoveManagedRolesAsync(string userPrincipalName, CancellationToken cancellationToken);
     Task<AzureAdRoleDiagnosticsResult> RunDiagnosticsAsync(CancellationToken cancellationToken);

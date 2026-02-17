@@ -114,6 +114,7 @@ public sealed class PedidosController : Controller
         var pedido = await _dbContext.Pedidos
             .AsNoTracking()
             .Include(x => x.TipoPedido)
+            .Include(x => x.Zinf)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (pedido is null)
@@ -126,6 +127,41 @@ public sealed class PedidosController : Controller
             return Forbid();
         }
 
+        var pedidoZinfId = pedido.ZinfId;
+        if (!isAdmin && (!pedidoZinfId.HasValue || !userZinfIds.Contains(pedidoZinfId.Value)))
+        {
+            TempData["ErrorMessage"] = "Não tem acesso a este pedido (ZINF não autorizada).";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var instituicoesMesmoZinf = pedidoZinfId.HasValue
+            ? await _dbContext.Instituicoes
+                .AsNoTracking()
+                .Where(x => x.ZinfId == pedidoZinfId.Value)
+                .OrderBy(x => x.Nome)
+                .Select(x => new PedidoInstituicaoListItemViewModel
+                {
+                    CodigoEA = x.CodigoEA,
+                    Nome = x.Nome,
+                    PessoaContacto = x.PessoaContacto,
+                    Email1 = x.Email1
+                })
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var estadoLogs = await _dbContext.PedidoEstadoLogs
+            .AsNoTracking()
+            .Where(x => x.PedidoId == pedido.Id)
+            .OrderByDescending(x => x.ChangedAtUtc)
+            .Select(x => new PedidoEstadoLogItemViewModel
+            {
+                ChangedAtUtc = x.ChangedAtUtc,
+                FromState = x.FromState,
+                ToState = x.ToState,
+                ChangedBy = x.ChangedBy
+            })
+            .ToListAsync(cancellationToken);
+
         var model = new PedidoDetailsViewModel
         {
             Id = pedido.Id,
@@ -133,7 +169,10 @@ public sealed class PedidosController : Controller
             State = pedido.State,
             TipoPedidoName = pedido.TipoPedido.Name,
             TipoPedidoTableName = pedido.TipoPedido.TableName,
-            ExternalRequestID = pedido.ExternalRequestID
+            ZinfName = pedido.Zinf != null ? pedido.Zinf.Nome : "-",
+            ExternalRequestID = pedido.ExternalRequestID,
+            EstadoLogs = estadoLogs,
+            InstituicoesMesmoZinf = instituicoesMesmoZinf
         };
 
         var pedidoBem = await _dbContext.PedidosBens
@@ -143,13 +182,6 @@ public sealed class PedidosController : Controller
         if (pedidoBem is null)
         {
             return NotFound();
-        }
-
-        var pedidoZinfId = pedido.ZinfId;
-
-        if (!pedidoZinfId.HasValue || (!isAdmin && !userZinfIds.Contains(pedidoZinfId.Value)))
-        {
-            return Forbid();
         }
 
         model.IsSupportedType = true;
@@ -211,8 +243,7 @@ public sealed class PedidosController : Controller
             new() { Label = "Consegue recolher perto de casa", Value = pedidoBem.CanPickUpNearby ? "Sim" : "Não" },
             new() { Label = "Tipos de produtos", Value = pedidoBem.NeededProductTypes },
             new() { Label = "Outros produtos (detalhe)", Value = pedidoBem.OtherNeededProductTypesDetails ?? "-" },
-            new() { Label = "Sugestões", Value = pedidoBem.Suggestions ?? "-" },
-            new() { Label = "Data pedido (UTC)", Value = pedidoBem.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm:ss") }
+            new() { Label = "Sugestões", Value = pedidoBem.Suggestions ?? "-" }
         ];
     }
 }

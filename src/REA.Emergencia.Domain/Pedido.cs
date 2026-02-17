@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace REA.Emergencia.Domain;
@@ -24,4 +25,6 @@ public sealed class Pedido
     public int? ZinfId { get; set; }
 
     public Zinf? Zinf { get; set; }
+
+    public ICollection<PedidoEstadoLog> EstadoLogs { get; set; } = new List<PedidoEstadoLog>();
 }

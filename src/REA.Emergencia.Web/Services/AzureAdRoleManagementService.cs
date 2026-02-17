@@ -3,6 +3,7 @@ using Microsoft.Kiota.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using REA.Emergencia.Web.Helpers;
 using REA.Emergencia.Web.Options;
 
 namespace REA.Emergencia.Web.Services;
@@ -120,6 +121,71 @@ public sealed class AzureAdRoleManagementService : IAzureAdRoleManagementService
             .OrderBy(x => x.DisplayName)
             .ThenBy(x => x.UserPrincipalName)
             .ToList();
+    }
+
+    public async Task<string?> ResolveUserEmailAsync(string userPrincipalName, CancellationToken cancellationToken)
+    {
+        var candidates = UserPrincipalNameNormalizer.BuildCandidates(userPrincipalName);
+        foreach (var candidate in candidates)
+        {
+            try
+            {
+                var user = await _graphClient.Users[candidate].GetAsync(
+                    request =>
+                    {
+                        request.QueryParameters.Select = ["mail", "userPrincipalName", "otherMails"];
+                    },
+                    cancellationToken);
+
+                if (user is null)
+                {
+                    continue;
+                }
+
+                var fromOtherMails = user.OtherMails?
+                    .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x) && x.Contains('@'));
+                if (!string.IsNullOrWhiteSpace(fromOtherMails))
+                {
+                    return fromOtherMails.Trim();
+                }
+
+                if (!string.IsNullOrWhiteSpace(user.Mail) && user.Mail.Contains('@'))
+                {
+                    return user.Mail.Trim();
+                }
+
+                if (!string.IsNullOrWhiteSpace(user.UserPrincipalName) && user.UserPrincipalName.Contains('@'))
+                {
+                    return user.UserPrincipalName.Trim();
+                }
+            }
+            catch
+            {
+                // Try next candidate.
+            }
+        }
+
+        var normalized = UserPrincipalNameNormalizer.Normalize(userPrincipalName);
+        if (!string.IsNullOrWhiteSpace(normalized))
+        {
+            if (normalized.Contains('@'))
+            {
+                return normalized;
+            }
+
+            // For guest-normalized values like user_domain.tld, recover user@domain.tld.
+            var firstUnderscore = normalized.IndexOf('_');
+            if (firstUnderscore > 0 && firstUnderscore < normalized.Length - 1)
+            {
+                var recovered = normalized[..firstUnderscore] + "@" + normalized[(firstUnderscore + 1)..];
+                if (recovered.Contains('@'))
+                {
+                    return recovered;
+                }
+            }
+        }
+
+        return null;
     }
 
     public async Task AssignRolesAsync(string userPrincipalName, bool isAdmin, bool isVolunteer, CancellationToken cancellationToken)

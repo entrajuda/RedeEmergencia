@@ -6,6 +6,11 @@
 
 <h1 class="mb-3">Pedidos</h1>
 
+@if (TempData["ErrorMessage"] is string errorMessage && !string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
 @if (Model.IsAdmin)
 {
     <div class="alert alert-info">

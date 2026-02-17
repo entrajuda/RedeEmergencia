@@ -758,6 +758,10 @@
               "target": "Package",
               "version": "[1.14.2, )"
             },
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.105.0, )"
+            },
             "FluentValidation.AspNetCore": {
               "target": "Package",
               "version": "[11.3.1, )"

@@ -13,12 +13,15 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<PedidoBem> PedidosBens => Set<PedidoBem>();
     public DbSet<TipoPedido> TiposPedido => Set<TipoPedido>();
     public DbSet<Pedido> Pedidos => Set<Pedido>();
+    public DbSet<PedidoEstadoLog> PedidoEstadoLogs => Set<PedidoEstadoLog>();
     public DbSet<Distrito> Distritos => Set<Distrito>();
     public DbSet<Concelho> Concelhos => Set<Concelho>();
     public DbSet<Zinf> Zinfs => Set<Zinf>();
     public DbSet<UserZinf> UserZinfs => Set<UserZinf>();
     public DbSet<CodigoPostal> CodigosPostais => Set<CodigoPostal>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
+    public DbSet<EmailLog> EmailLogs => Set<EmailLog>();
+    public DbSet<Instituicao> Instituicoes => Set<Instituicao>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -72,6 +75,31 @@ public sealed class ApplicationDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.ZinfId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PedidoEstadoLog>(entity =>
+        {
+            entity.ToTable("PedidoEstadoLogs");
+
+            entity.Property(e => e.ChangedAtUtc)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(e => e.FromState)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.ToState)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.ChangedBy)
+                .IsRequired()
+                .HasMaxLength(256);
+
+            entity.HasOne(e => e.Pedido)
+                .WithMany(e => e.EstadoLogs)
+                .HasForeignKey(e => e.PedidoId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Distrito>(entity =>
@@ -166,6 +194,73 @@ public sealed class ApplicationDbContext : DbContext
 
             entity.HasIndex(e => e.Key)
                 .IsUnique();
+        });
+
+        modelBuilder.Entity<EmailLog>(entity =>
+        {
+            entity.ToTable("EmailLogs");
+
+            entity.Property(e => e.SentAtUtc)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(e => e.Recipients)
+                .IsRequired()
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.Subject)
+                .IsRequired()
+                .HasMaxLength(300);
+        });
+
+        modelBuilder.Entity<Instituicao>(entity =>
+        {
+            entity.ToTable("Instituicoes");
+
+            entity.Property(e => e.CodigoEA)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasIndex(e => e.CodigoEA)
+                .IsUnique();
+
+            entity.Property(e => e.Nome)
+                .IsRequired()
+                .HasMaxLength(300);
+
+            entity.Property(e => e.PessoaContacto)
+                .HasMaxLength(200);
+
+            entity.Property(e => e.Telefone)
+                .HasMaxLength(50);
+
+            entity.Property(e => e.Telemovel)
+                .HasMaxLength(50);
+
+            entity.Property(e => e.Email1)
+                .HasMaxLength(200);
+
+            entity.Property(e => e.Localidade)
+                .HasMaxLength(200);
+
+            entity.HasOne(e => e.Concelho)
+                .WithMany()
+                .HasForeignKey(e => e.ConcelhoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Distrito)
+                .WithMany()
+                .HasForeignKey(e => e.DistritoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Zinf)
+                .WithMany()
+                .HasForeignKey(e => e.ZinfId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.CodigoPostal)
+                .WithMany()
+                .HasForeignKey(e => e.CodigoPostalNumero)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

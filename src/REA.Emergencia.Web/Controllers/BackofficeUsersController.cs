@@ -33,15 +33,23 @@ public sealed class BackofficeUsersController : Controller
         try
         {
             var users = await _roleManagementService.GetManagedUserAssignmentsAsync(cancellationToken);
-            var zinfCounts = await _dbContext.UserZinfs
+            var userZinfAssignments = await _dbContext.UserZinfs
                 .AsNoTracking()
-                .GroupBy(x => x.UserPrincipalName)
-                .Select(g => new { UserPrincipalName = g.Key, Total = g.Count() })
+                .Include(x => x.Zinf)
                 .ToListAsync(cancellationToken);
 
-            var zinfCountByUpn = zinfCounts
+            var zinfInfoByUpn = userZinfAssignments
                 .GroupBy(x => UserPrincipalNameNormalizer.Normalize(x.UserPrincipalName), StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.Total), StringComparer.OrdinalIgnoreCase);
+                .ToDictionary(
+                    g => g.Key,
+                    g => g
+                        .Select(x => x.Zinf?.Nome)
+                        .OfType<string>()
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                        .ToList(),
+                    StringComparer.OrdinalIgnoreCase);
 
             var directoryUsers = await _roleManagementService.GetDirectoryUsersAsync(cancellationToken);
             model.Users = users
@@ -51,7 +59,10 @@ public sealed class BackofficeUsersController : Controller
                     UserPrincipalName = x.UserPrincipalName,
                     IsAdmin = x.IsAdmin,
                     IsVolunteer = x.IsVolunteer,
-                    TotalZinfs = zinfCountByUpn.TryGetValue(UserPrincipalNameNormalizer.Normalize(x.UserPrincipalName), out var total) ? total : 0
+                    TotalZinfs = zinfInfoByUpn.TryGetValue(UserPrincipalNameNormalizer.Normalize(x.UserPrincipalName), out var names) ? names.Count : 0,
+                    AssignedZinfNames = zinfInfoByUpn.TryGetValue(UserPrincipalNameNormalizer.Normalize(x.UserPrincipalName), out var assignedNames)
+                        ? assignedNames
+                        : Array.Empty<string>()
                 })
                 .ToList();
             model.DirectoryUserOptions = BuildDirectoryUserOptions(directoryUsers, model.AssignInput.UserPrincipalName);
@@ -307,15 +318,23 @@ public sealed class BackofficeUsersController : Controller
             var directoryUsers = await _roleManagementService.GetDirectoryUsersAsync(cancellationToken);
             logs.Add($"Utilizadores disponíveis no diretório: {directoryUsers.Count}.");
 
-            var zinfCounts = await _dbContext.UserZinfs
+            var userZinfAssignments = await _dbContext.UserZinfs
                 .AsNoTracking()
-                .GroupBy(x => x.UserPrincipalName)
-                .Select(g => new { UserPrincipalName = g.Key, Total = g.Count() })
+                .Include(x => x.Zinf)
                 .ToListAsync(cancellationToken);
 
-            var zinfCountByUpn = zinfCounts
+            var zinfInfoByUpn = userZinfAssignments
                 .GroupBy(x => UserPrincipalNameNormalizer.Normalize(x.UserPrincipalName), StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.Total), StringComparer.OrdinalIgnoreCase);
+                .ToDictionary(
+                    g => g.Key,
+                    g => g
+                        .Select(x => x.Zinf?.Nome)
+                        .OfType<string>()
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                        .ToList(),
+                    StringComparer.OrdinalIgnoreCase);
 
             model.Users = users
                 .Select(x => new BackofficeUserRoleItemViewModel
@@ -324,7 +343,10 @@ public sealed class BackofficeUsersController : Controller
                     UserPrincipalName = x.UserPrincipalName,
                     IsAdmin = x.IsAdmin,
                     IsVolunteer = x.IsVolunteer,
-                    TotalZinfs = zinfCountByUpn.TryGetValue(UserPrincipalNameNormalizer.Normalize(x.UserPrincipalName), out var total) ? total : 0
+                    TotalZinfs = zinfInfoByUpn.TryGetValue(UserPrincipalNameNormalizer.Normalize(x.UserPrincipalName), out var names) ? names.Count : 0,
+                    AssignedZinfNames = zinfInfoByUpn.TryGetValue(UserPrincipalNameNormalizer.Normalize(x.UserPrincipalName), out var assignedNames)
+                        ? assignedNames
+                        : Array.Empty<string>()
                 })
                 .ToList();
             model.DirectoryUserOptions = BuildDirectoryUserOptions(directoryUsers, model.AssignInput.UserPrincipalName);

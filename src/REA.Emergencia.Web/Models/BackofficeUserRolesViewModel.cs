@@ -29,6 +29,7 @@ public sealed class BackofficeUserRoleItemViewModel
     public bool IsAdmin { get; set; }
     public bool IsVolunteer { get; set; }
     public int TotalZinfs { get; set; }
+    public IReadOnlyList<string> AssignedZinfNames { get; set; } = Array.Empty<string>();
 }
 
 public sealed class ManageUserZinfsViewModel

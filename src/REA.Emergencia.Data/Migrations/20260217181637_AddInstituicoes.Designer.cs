@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using REA.Emergencia.Data;
 
@@ -11,9 +12,11 @@ using REA.Emergencia.Data;
 namespace REA.Emergencia.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260217181637_AddInstituicoes")]
+    partial class AddInstituicoes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -359,44 +362,6 @@ namespace REA.Emergencia.Data.Migrations
                     b.ToTable("PedidosBens", (string)null);
                 });
 
-            modelBuilder.Entity("REA.Emergencia.Domain.PedidoEstadoLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("ChangedAtUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("ChangedBy")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("FromState")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("PedidoId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ToState")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PedidoId");
-
-                    b.ToTable("PedidoEstadoLogs", (string)null);
-                });
-
             modelBuilder.Entity("REA.Emergencia.Domain.TipoPedido", b =>
                 {
                     b.Property<int>("Id")
@@ -544,17 +509,6 @@ namespace REA.Emergencia.Data.Migrations
                     b.Navigation("Zinf");
                 });
 
-            modelBuilder.Entity("REA.Emergencia.Domain.PedidoEstadoLog", b =>
-                {
-                    b.HasOne("REA.Emergencia.Domain.Pedido", "Pedido")
-                        .WithMany("EstadoLogs")
-                        .HasForeignKey("PedidoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pedido");
-                });
-
             modelBuilder.Entity("REA.Emergencia.Domain.UserZinf", b =>
                 {
                     b.HasOne("REA.Emergencia.Domain.Zinf", "Zinf")
@@ -574,11 +528,6 @@ namespace REA.Emergencia.Data.Migrations
             modelBuilder.Entity("REA.Emergencia.Domain.Distrito", b =>
                 {
                     b.Navigation("Concelhos");
-                });
-
-            modelBuilder.Entity("REA.Emergencia.Domain.Pedido", b =>
-                {
-                    b.Navigation("EstadoLogs");
                 });
 
             modelBuilder.Entity("REA.Emergencia.Domain.TipoPedido", b =>

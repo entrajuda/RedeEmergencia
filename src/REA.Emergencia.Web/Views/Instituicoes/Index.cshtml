@@ -1,0 +1,156 @@
+@model REA.Emergencia.Web.Models.InstituicoesIndexViewModel
+
+@{
+    ViewData["Title"] = "Instituições";
+}
+
+<h1 class="mb-3">Instituições</h1>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-success">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<div class="card mb-4">
+    <div class="card-header">Importar instituições de Excel</div>
+    <div class="card-body">
+        <form asp-action="Import" method="post" enctype="multipart/form-data" class="row g-3 align-items-end">
+            @Html.AntiForgeryToken()
+            <div class="col-md-8">
+                <label class="form-label" for="excelFile">Ficheiro (.xlsx)</label>
+                <input type="file" id="excelFile" name="excelFile" class="form-control" accept=".xlsx" />
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary">Importar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.ImportResult is not null)
+{
+    <div class="alert alert-secondary">
+        <div><strong>Resumo da importação</strong></div>
+        <div>Linhas processadas: @Model.ImportResult.ProcessedRows</div>
+        <div>Inseridas: @Model.ImportResult.Inserted</div>
+        <div>Atualizadas: @Model.ImportResult.Updated</div>
+        @if (Model.ImportResult.Errors.Any())
+        {
+            <hr />
+            <div><strong>Erros (até 200):</strong></div>
+            <ul class="mb-0 mt-2">
+                @foreach (var error in Model.ImportResult.Errors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        }
+    </div>
+}
+
+<form method="get" class="row g-3 align-items-end mb-3">
+    <div class="col-md-2">
+        <label for="codigoEA" class="form-label">Código EA</label>
+        <input id="codigoEA" name="codigoEA" value="@Model.CodigoEA" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label for="nome" class="form-label">Nome</label>
+        <input id="nome" name="nome" value="@Model.Nome" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <label for="distritoId" class="form-label">Distrito</label>
+        <select asp-for="DistritoId" id="distritoId" class="form-select" asp-items="Model.DistritoOptions">
+            <option value="">Todos</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label for="concelho" class="form-label">Concelho</label>
+        <input id="concelho" name="concelho" value="@Model.Concelho" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label for="zinfId" class="form-label">ZINF</label>
+        <select asp-for="ZinfId" id="zinfId" class="form-select" asp-items="Model.ZinfOptions">
+            <option value="">Todas</option>
+        </select>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Limpar</a>
+    </div>
+</form>
+
+<p class="text-muted">
+    A mostrar @Model.StartItem - @Model.EndItem de @Model.TotalItems instituições.
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Código EA</th>
+            <th>Nome</th>
+            <th>Distrito</th>
+            <th>Concelho</th>
+            <th>ZINF</th>
+            <th>Pessoa de Contacto</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Instituicoes.Any())
+        {
+            <tr>
+                <td colspan="7">Sem instituições registadas.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var instituicao in Model.Instituicoes)
+            {
+                <tr>
+                    <td>@instituicao.CodigoEA</td>
+                    <td>@instituicao.Nome</td>
+                    <td>@(instituicao.Distrito ?? "-")</td>
+                    <td>@(instituicao.Concelho ?? "-")</td>
+                    <td>@(instituicao.Zinf ?? "-")</td>
+                    <td>@(instituicao.PessoaContacto ?? "-")</td>
+                    <td>@(instituicao.Email1 ?? "-")</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<nav aria-label="Paginação de instituições">
+    <ul class="pagination">
+        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-page="@(Model.Page - 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-codigoEA="@Model.CodigoEA"
+               asp-route-nome="@Model.Nome"
+               asp-route-distritoId="@Model.DistritoId"
+               asp-route-concelho="@Model.Concelho"
+               asp-route-zinfId="@Model.ZinfId">Anterior</a>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">Página @Model.Page de @Model.TotalPages</span>
+        </li>
+        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-page="@(Model.Page + 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-codigoEA="@Model.CodigoEA"
+               asp-route-nome="@Model.Nome"
+               asp-route-distritoId="@Model.DistritoId"
+               asp-route-concelho="@Model.Concelho"
+               asp-route-zinfId="@Model.ZinfId">Próxima</a>
+        </li>
+    </ul>
+</nav>

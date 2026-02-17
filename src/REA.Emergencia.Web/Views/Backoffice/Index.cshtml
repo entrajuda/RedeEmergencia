@@ -27,11 +27,30 @@
             </a>
             <a asp-controller="Concelhos" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.25 11.5H4.75a.75.75 0 0 1 0-1.5h6.5a.75.75 0 0 1 0 1.5zm0-3H4.75a.75.75 0 0 1 0-1.5h6.5a.75.75 0 0 1 0 1.5zm0-3H4.75a.75.75 0 0 1 0-1.5h6.5a.75.75 0 0 1 0 1.5z"/>
+                    <path d="M8 16s6-5.686 6-10A6 6 0 1 0 2 6c0 4.314 6 10 6 10zm0-7.5A2.5 2.5 0 1 1 8 3a2.5 2.5 0 0 1 0 5.5z"/>
                 </svg>
                 <div>
                     <div>Gerir Concelhos</div>
                     <small class="text-muted">Associar concelhos a distritos e ZINF.</small>
+                </div>
+            </a>
+            <a asp-controller="Zinfs" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 6.5h-7v-1h7v1zm0 2.5h-7v-1h7v1zm0 2.5h-7v-1h7v1z"/>
+                </svg>
+                <div>
+                    <div>Listar Zonas de Influência</div>
+                    <small class="text-muted">Ver ZINFs e utilizadores associados.</small>
+                </div>
+            </a>
+            <a asp-controller="Instituicoes" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1ZM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM4.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Z"/>
+                    <path fill-rule="evenodd" d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V1Zm11 0v14h-3v-2.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5V15H3V1h10Z"/>
+                </svg>
+                <div>
+                    <div>Gerir Instituições</div>
+                    <small class="text-muted">Importar e consultar instituições.</small>
                 </div>
             </a>
             <a asp-controller="CodigosPostais" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
@@ -54,11 +73,21 @@
             </a>
             <a asp-controller="BackofficeSettings" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M9.669.864 8 0 6.331.864l-.762 1.88-2.02.326-.41 1.861 1.38 1.503-.326 2.02L6.073 9l1.927-.893L9.927 9l1.88-.762-.326-2.02 1.38-1.503-.41-1.86-2.02-.327-.762-1.88zM8 5.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/>
+                    <path d="M8.837 1.626a.5.5 0 0 1 .326-.157l.95-.114a.5.5 0 0 1 .542.41l.14.775a4.985 4.985 0 0 1 .58.335l.72-.312a.5.5 0 0 1 .64.27l.38.879a.5.5 0 0 1-.19.63l-.627.45c.04.21.06.425.06.644s-.02.434-.06.645l.627.449a.5.5 0 0 1 .19.631l-.38.879a.5.5 0 0 1-.64.269l-.72-.311a4.985 4.985 0 0 1-.58.335l-.14.775a.5.5 0 0 1-.542.41l-.95-.114a.5.5 0 0 1-.326-.157l-.517-.593a4.985 4.985 0 0 1-.67 0l-.517.593a.5.5 0 0 1-.326.157l-.95.114a.5.5 0 0 1-.542-.41l-.14-.775a4.985 4.985 0 0 1-.58-.335l-.72.311a.5.5 0 0 1-.64-.269l-.38-.879a.5.5 0 0 1 .19-.631l.627-.45A3.53 3.53 0 0 1 3.4 5c0-.219.02-.434.06-.645l-.627-.449a.5.5 0 0 1-.19-.63l.38-.879a.5.5 0 0 1 .64-.27l.72.312c.184-.123.378-.235.58-.335l.14-.775a.5.5 0 0 1 .542-.41l.95.114a.5.5 0 0 1 .326.157l.517.593c.223-.016.447-.016.67 0l.517-.593zM8 6.5A1.5 1.5 0 1 0 8 3.5a1.5 1.5 0 0 0 0 3z"/>
+                    <path d="M2.5 10a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm8.5 2a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"/>
                 </svg>
                 <div>
                     <div>Configurações da Aplicação</div>
                     <small class="text-muted">Definir templates e parâmetros globais.</small>
+                </div>
+            </a>
+            <a asp-controller="EmailLogs" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mt-1" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-.5a.5.5 0 0 0-.5.5v.217l6.5 3.9 6.5-3.9V4a.5.5 0 0 0-.5-.5H2zm12.5 2.217-4.958 2.975L14.5 11.67V5.717zm-.803 6.783-4.746-2.847-.694.416a.5.5 0 0 1-.514 0l-.694-.416-4.746 2.847a.5.5 0 0 0 .197.04h12a.5.5 0 0 0 .197-.04zM1.5 11.67l4.958-2.978L1.5 5.717v5.952z"/>
+                </svg>
+                <div>
+                    <div>Logs de Emails</div>
+                    <small class="text-muted">Consultar histórico de emails enviados.</small>
                 </div>
             </a>
         </div>

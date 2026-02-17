@@ -30,11 +30,20 @@ public sealed class BackofficeSettingsController : Controller
                        ?? string.Empty;
         var novoPedidoTemplate = await _appSettingsService.GetValueAsync(AppSettingKeys.NovoPedidolTemplate, cancellationToken) ?? string.Empty;
         var sendEmailToPedidoCreatorRaw = await _appSettingsService.GetValueAsync(AppSettingKeys.SendEmailToPedidoCreator, cancellationToken);
+        var sendNovoPedidoEmailToZinfUsersRaw = await _appSettingsService.GetValueAsync(AppSettingKeys.SendNovoPedidoEmailToZinfUsers, cancellationToken);
+        var emailDryRunEnabledRaw = await _appSettingsService.GetValueAsync(AppSettingKeys.EmailDryRunEnabled, cancellationToken);
+        var emailDryRunRecipient = await _appSettingsService.GetValueAsync(AppSettingKeys.EmailDryRunRecipient, cancellationToken) ?? string.Empty;
         var selectedTheme = await _appSettingsService.GetValueAsync(AppSettingKeys.SiteTheme, cancellationToken) ?? "bootstrap-local";
         var emailFrom = await _appSettingsService.GetValueAsync(AppSettingKeys.EmailFrom, cancellationToken) ?? string.Empty;
         var sendEmailToPedidoCreator = !string.IsNullOrWhiteSpace(sendEmailToPedidoCreatorRaw)
             ? string.Equals(sendEmailToPedidoCreatorRaw, "true", StringComparison.OrdinalIgnoreCase)
             : true;
+        var sendNovoPedidoEmailToZinfUsers = !string.IsNullOrWhiteSpace(sendNovoPedidoEmailToZinfUsersRaw)
+            ? string.Equals(sendNovoPedidoEmailToZinfUsersRaw, "true", StringComparison.OrdinalIgnoreCase)
+            : true;
+        var emailDryRunEnabled = !string.IsNullOrWhiteSpace(emailDryRunEnabledRaw)
+            ? string.Equals(emailDryRunEnabledRaw, "true", StringComparison.OrdinalIgnoreCase)
+            : false;
 
         var model = new AppSettingsViewModel
         {
@@ -42,6 +51,9 @@ public sealed class BackofficeSettingsController : Controller
             PedidoBensEmailTemplate = template,
             NovoPedidolTemplate = novoPedidoTemplate,
             SendEmailToPedidoCreator = sendEmailToPedidoCreator,
+            SendNovoPedidoEmailToZinfUsers = sendNovoPedidoEmailToZinfUsers,
+            EmailDryRunEnabled = emailDryRunEnabled,
+            EmailDryRunRecipient = emailDryRunRecipient,
             SiteTheme = selectedTheme,
             SiteThemeOptions = AppThemeCatalog.GetThemeOptions(selectedTheme)
         };
@@ -60,9 +72,18 @@ public sealed class BackofficeSettingsController : Controller
             return View(model);
         }
 
+        if (model.EmailDryRunEnabled && string.IsNullOrWhiteSpace(model.EmailDryRunRecipient))
+        {
+            ModelState.AddModelError(nameof(model.EmailDryRunRecipient), "Introduza o email de destino para DryRun.");
+            return View(model);
+        }
+
         await _appSettingsService.SetValueAsync(AppSettingKeys.PedidoBensEmailTemplate, model.PedidoBensEmailTemplate, cancellationToken);
         await _appSettingsService.SetValueAsync(AppSettingKeys.NovoPedidolTemplate, model.NovoPedidolTemplate, cancellationToken);
         await _appSettingsService.SetValueAsync(AppSettingKeys.SendEmailToPedidoCreator, model.SendEmailToPedidoCreator ? "true" : "false", cancellationToken);
+        await _appSettingsService.SetValueAsync(AppSettingKeys.SendNovoPedidoEmailToZinfUsers, model.SendNovoPedidoEmailToZinfUsers ? "true" : "false", cancellationToken);
+        await _appSettingsService.SetValueAsync(AppSettingKeys.EmailDryRunEnabled, model.EmailDryRunEnabled ? "true" : "false", cancellationToken);
+        await _appSettingsService.SetValueAsync(AppSettingKeys.EmailDryRunRecipient, model.EmailDryRunRecipient?.Trim() ?? string.Empty, cancellationToken);
         await _appSettingsService.SetValueAsync(AppSettingKeys.SiteTheme, model.SiteTheme, cancellationToken);
         await _appSettingsService.SetValueAsync(AppSettingKeys.EmailFrom, model.EmailFrom, cancellationToken);
 

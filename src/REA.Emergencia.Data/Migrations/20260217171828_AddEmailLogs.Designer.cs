@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using REA.Emergencia.Data;
 
@@ -11,9 +12,11 @@ using REA.Emergencia.Data;
 namespace REA.Emergencia.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260217171828_AddEmailLogs")]
+    partial class AddEmailLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -145,72 +148,6 @@ namespace REA.Emergencia.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EmailLogs", (string)null);
-                });
-
-            modelBuilder.Entity("REA.Emergencia.Domain.Instituicao", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CodigoEA")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("CodigoPostalNumero")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ConcelhoId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DistritoId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Email1")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Localidade")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("PessoaContacto")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Telefone")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Telemovel")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("ZinfId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CodigoEA")
-                        .IsUnique();
-
-                    b.HasIndex("CodigoPostalNumero");
-
-                    b.HasIndex("ConcelhoId");
-
-                    b.HasIndex("DistritoId");
-
-                    b.HasIndex("ZinfId");
-
-                    b.ToTable("Instituicoes", (string)null);
                 });
 
             modelBuilder.Entity("REA.Emergencia.Domain.Pedido", b =>
@@ -359,44 +296,6 @@ namespace REA.Emergencia.Data.Migrations
                     b.ToTable("PedidosBens", (string)null);
                 });
 
-            modelBuilder.Entity("REA.Emergencia.Domain.PedidoEstadoLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("ChangedAtUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("ChangedBy")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("FromState")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("PedidoId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ToState")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PedidoId");
-
-                    b.ToTable("PedidoEstadoLogs", (string)null);
-                });
-
             modelBuilder.Entity("REA.Emergencia.Domain.TipoPedido", b =>
                 {
                     b.Property<int>("Id")
@@ -495,37 +394,6 @@ namespace REA.Emergencia.Data.Migrations
                     b.Navigation("Zinf");
                 });
 
-            modelBuilder.Entity("REA.Emergencia.Domain.Instituicao", b =>
-                {
-                    b.HasOne("REA.Emergencia.Domain.CodigoPostal", "CodigoPostal")
-                        .WithMany()
-                        .HasForeignKey("CodigoPostalNumero")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("REA.Emergencia.Domain.Concelho", "Concelho")
-                        .WithMany()
-                        .HasForeignKey("ConcelhoId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("REA.Emergencia.Domain.Distrito", "Distrito")
-                        .WithMany()
-                        .HasForeignKey("DistritoId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("REA.Emergencia.Domain.Zinf", "Zinf")
-                        .WithMany()
-                        .HasForeignKey("ZinfId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("CodigoPostal");
-
-                    b.Navigation("Concelho");
-
-                    b.Navigation("Distrito");
-
-                    b.Navigation("Zinf");
-                });
-
             modelBuilder.Entity("REA.Emergencia.Domain.Pedido", b =>
                 {
                     b.HasOne("REA.Emergencia.Domain.TipoPedido", "TipoPedido")
@@ -542,17 +410,6 @@ namespace REA.Emergencia.Data.Migrations
                     b.Navigation("TipoPedido");
 
                     b.Navigation("Zinf");
-                });
-
-            modelBuilder.Entity("REA.Emergencia.Domain.PedidoEstadoLog", b =>
-                {
-                    b.HasOne("REA.Emergencia.Domain.Pedido", "Pedido")
-                        .WithMany("EstadoLogs")
-                        .HasForeignKey("PedidoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pedido");
                 });
 
             modelBuilder.Entity("REA.Emergencia.Domain.UserZinf", b =>
@@ -574,11 +431,6 @@ namespace REA.Emergencia.Data.Migrations
             modelBuilder.Entity("REA.Emergencia.Domain.Distrito", b =>
                 {
                     b.Navigation("Concelhos");
-                });
-
-            modelBuilder.Entity("REA.Emergencia.Domain.Pedido", b =>
-                {
-                    b.Navigation("EstadoLogs");
                 });
 
             modelBuilder.Entity("REA.Emergencia.Domain.TipoPedido", b =>

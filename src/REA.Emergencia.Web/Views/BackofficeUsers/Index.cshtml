@@ -75,9 +75,15 @@
                             <td>@(user.IsVolunteer ? "Sim" : "Não")</td>
                             <td>@user.TotalZinfs</td>
                             <td>
+                                @{
+                                    var zinfTooltip = user.AssignedZinfNames.Any()
+                                        ? $"ZINFs:{Environment.NewLine}{string.Join(Environment.NewLine, user.AssignedZinfNames)}"
+                                        : "Sem ZINFs atribuídas";
+                                }
                                 <div class="d-flex gap-2">
                                     <a asp-action="ManageZinfs"
                                        asp-route-userPrincipalName="@user.UserPrincipalName"
+                                       title="@zinfTooltip"
                                        class="btn btn-sm btn-outline-primary">Gerir ZINFs</a>
 
                                     <form asp-action="RemoveUserRoles" method="post" onsubmit="return confirm('Remover todos os perfis deste utilizador nesta aplicação?');">

@@ -13,9 +13,9 @@
     <div class="card-body">
         <p class="mb-1"><strong>ID Pedido:</strong> @Model.Id</p>
         <p class="mb-1"><strong>Tipo:</strong> @Model.TipoPedidoName</p>
+        <p class="mb-1"><strong>ZINF:</strong> @Model.ZinfName</p>
         <p class="mb-1"><strong>Estado:</strong> @Model.State</p>
-        <p class="mb-1"><strong>Data (UTC):</strong> @Model.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</p>
-        <p class="mb-0"><strong>ID Externo:</strong> @Model.ExternalRequestID</p>
+        <p class="mb-0"><strong>Data (UTC):</strong> @Model.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</p>
     </div>
 </div>
 
@@ -28,8 +28,20 @@
 else
 {
     <div class="card">
-        <div class="card-header">Dados do Pedido</div>
-        <div class="card-body p-0">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Dados do Pedido</span>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary js-collapse-toggle"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#dadosPedidoBody"
+                    aria-expanded="true"
+                    aria-controls="dadosPedidoBody"
+                    aria-label="Mostrar/Ocultar Dados do Pedido">
+                <span class="js-arrow">▲</span>
+            </button>
+        </div>
+        <div id="dadosPedidoBody" class="collapse show">
+            <div class="card-body p-0">
             <table class="table table-striped mb-0">
                 <tbody>
                     @foreach (var field in Model.Fields)
@@ -41,6 +53,179 @@ else
                     }
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
+
+    <div class="card mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Estados do Pedido</span>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary js-collapse-toggle"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#estadosPedidoBody"
+                    aria-expanded="true"
+                    aria-controls="estadosPedidoBody"
+                    aria-label="Mostrar/Ocultar Estados do Pedido">
+                <span class="js-arrow">▲</span>
+            </button>
+        </div>
+        <div id="estadosPedidoBody" class="collapse show">
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Data alteração (UTC)</th>
+                            <th>Estado anterior</th>
+                            <th>Novo estado</th>
+                            <th>Alterado por</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.EstadoLogs.Any())
+                        {
+                            <tr>
+                                <td colspan="4">Sem histórico de estados.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var log in Model.EstadoLogs)
+                            {
+                                <tr>
+                                    <td>@log.ChangedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                    <td>@log.FromState</td>
+                                    <td>@log.ToState</td>
+                                    <td>@log.ChangedBy</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Instituição para Encaminhamento</span>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary js-collapse-toggle"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#instituicoesEncaminhamentoBody"
+                    aria-expanded="true"
+                    aria-controls="instituicoesEncaminhamentoBody"
+                    aria-label="Mostrar/Ocultar Instituição para Encaminhamento">
+                <span class="js-arrow">▲</span>
+            </button>
+        </div>
+        <div id="instituicoesEncaminhamentoBody" class="collapse show">
+            <div class="card-body p-0">
+            <div class="p-3 border-bottom">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="instituicaoFiltroCodigoEa" class="form-label">Código EA</label>
+                        <input id="instituicaoFiltroCodigoEa" type="text" class="form-control" placeholder="Filtrar por Código EA" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="instituicaoFiltroNome" class="form-label">Nome</label>
+                        <input id="instituicaoFiltroNome" type="text" class="form-control" placeholder="Filtrar por Nome" />
+                    </div>
+                </div>
+            </div>
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Código EA</th>
+                        <th>Nome</th>
+                        <th>Pessoa de Contacto</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.InstituicoesMesmoZinf.Any())
+                    {
+                        <tr>
+                            <td colspan="4">Sem instituições para a ZINF deste pedido.</td>
+                        </tr>
+                    }
+                        else
+                        {
+                            @foreach (var instituicao in Model.InstituicoesMesmoZinf)
+                            {
+                                <tr class="instituicao-row"
+                                    data-codigoea="@instituicao.CodigoEA"
+                                    data-nome="@instituicao.Nome">
+                                    <td>@instituicao.CodigoEA</td>
+                                    <td>@instituicao.Nome</td>
+                                    <td>@(instituicao.PessoaContacto ?? "-")</td>
+                                    <td>@(instituicao.Email1 ?? "-")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (() => {
+            const toggles = document.querySelectorAll(".js-collapse-toggle");
+            toggles.forEach((btn) => {
+                const targetSelector = btn.getAttribute("data-bs-target");
+                if (!targetSelector) {
+                    return;
+                }
+
+                const target = document.querySelector(targetSelector);
+                if (!target) {
+                    return;
+                }
+
+                const arrow = btn.querySelector(".js-arrow");
+                const updateArrow = () => {
+                    const isShown = target.classList.contains("show");
+                    if (arrow) {
+                        arrow.textContent = isShown ? "▲" : "▼";
+                    }
+                    btn.setAttribute("aria-expanded", isShown ? "true" : "false");
+                };
+
+                target.addEventListener("shown.bs.collapse", updateArrow);
+                target.addEventListener("hidden.bs.collapse", updateArrow);
+                updateArrow();
+            });
+        })();
+
+        (() => {
+            const codigoEaInput = document.getElementById("instituicaoFiltroCodigoEa");
+            const nomeInput = document.getElementById("instituicaoFiltroNome");
+            const rows = Array.from(document.querySelectorAll(".instituicao-row"));
+
+            if (!codigoEaInput || !nomeInput || rows.length === 0) {
+                return;
+            }
+
+            const normalize = (value) => (value || "").toString().trim().toLowerCase();
+
+            const applyFilters = () => {
+                const codigoEaFilter = normalize(codigoEaInput.value);
+                const nomeFilter = normalize(nomeInput.value);
+
+                rows.forEach((row) => {
+                    const codigoEa = normalize(row.getAttribute("data-codigoea"));
+                    const nome = normalize(row.getAttribute("data-nome"));
+                    const matchesCodigoEa = !codigoEaFilter || codigoEa.includes(codigoEaFilter);
+                    const matchesNome = !nomeFilter || nome.includes(nomeFilter);
+                    row.style.display = matchesCodigoEa && matchesNome ? "" : "none";
+                });
+            };
+
+            codigoEaInput.addEventListener("input", applyFilters);
+            nomeInput.addEventListener("input", applyFilters);
+        })();
+    </script>
 }

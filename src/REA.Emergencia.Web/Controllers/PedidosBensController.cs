@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using REA.Emergencia.Data;
 using REA.Emergencia.Domain;
+using REA.Emergencia.Web.Helpers;
 using REA.Emergencia.Web.Models;
 using REA.Emergencia.Web.Services;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace REA.Emergencia.Web.Controllers;
@@ -12,17 +14,20 @@ public sealed class PedidosBensController : Controller
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IAppSettingsService _appSettingsService;
+    private readonly IAzureAdRoleManagementService _azureAdRoleManagementService;
     private readonly IRequestNotificationEmailService _requestNotificationEmailService;
     private readonly ILogger<PedidosBensController> _logger;
 
     public PedidosBensController(
         ApplicationDbContext dbContext,
         IAppSettingsService appSettingsService,
+        IAzureAdRoleManagementService azureAdRoleManagementService,
         IRequestNotificationEmailService requestNotificationEmailService,
         ILogger<PedidosBensController> logger)
     {
         _dbContext = dbContext;
         _appSettingsService = appSettingsService;
+        _azureAdRoleManagementService = azureAdRoleManagementService;
         _requestNotificationEmailService = requestNotificationEmailService;
         _logger = logger;
     }
@@ -123,9 +128,20 @@ public sealed class PedidosBensController : Controller
 
         _dbContext.Pedidos.Add(pedido);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        _dbContext.PedidoEstadoLogs.Add(new PedidoEstadoLog
+        {
+            PedidoId = pedido.Id,
+            FromState = "SEM_ESTADO",
+            ToState = pedido.State,
+            ChangedBy = ResolveChangedBy(model.Email)
+        });
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
         await transaction.CommitAsync(cancellationToken);
 
         await TrySendSubmissionEmailAsync(model.Email, pedido.PublicId, cancellationToken);
+        await TrySendNovoPedidoEmailToZinfUsersAsync(pedido.Id, pedido.PublicId, pedido.ZinfId, cancellationToken);
 
         return RedirectToAction(nameof(Success), new { publicId = pedido.PublicId });
     }
@@ -226,6 +242,101 @@ public sealed class PedidosBensController : Controller
         }
     }
 
+    private async Task TrySendNovoPedidoEmailToZinfUsersAsync(int pedidoId, Guid pedidoPublicId, int? zinfId, CancellationToken cancellationToken)
+    {
+        if (!zinfId.HasValue)
+        {
+            return;
+        }
+
+        var sendNovoPedidoEmailRaw = await _appSettingsService.GetValueAsync(AppSettingKeys.SendNovoPedidoEmailToZinfUsers, cancellationToken);
+        var sendNovoPedidoEmail = !string.IsNullOrWhiteSpace(sendNovoPedidoEmailRaw)
+            ? string.Equals(sendNovoPedidoEmailRaw, "true", StringComparison.OrdinalIgnoreCase)
+            : true;
+
+        if (!sendNovoPedidoEmail)
+        {
+            return;
+        }
+
+        var template = await _appSettingsService.GetValueAsync(AppSettingKeys.NovoPedidolTemplate, cancellationToken);
+        if (string.IsNullOrWhiteSpace(template))
+        {
+            return;
+        }
+
+        var userPrincipalNames = await _dbContext.UserZinfs
+            .AsNoTracking()
+            .Where(x => x.ZinfId == zinfId.Value)
+            .Select(x => x.UserPrincipalName)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        if (userPrincipalNames.Count == 0)
+        {
+            return;
+        }
+
+        var pedidoStatusUrl = Url.Action(
+            action: nameof(EstadoPedido),
+            controller: "PedidosBens",
+            values: new { publicId = pedidoPublicId },
+            protocol: Request.Scheme);
+
+        var templateBody = template.Replace("{GuidPedido}", pedidoPublicId.ToString(), StringComparison.OrdinalIgnoreCase);
+        var body = string.IsNullOrWhiteSpace(pedidoStatusUrl)
+            ? templateBody
+            : $"{templateBody}<br><br><a href=\"{pedidoStatusUrl}\">Consultar pedido</a>";
+
+        foreach (var upn in userPrincipalNames)
+        {
+            string? recipientEmail;
+            try
+            {
+                recipientEmail = await _azureAdRoleManagementService.ResolveUserEmailAsync(upn, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Erro ao resolver email no Active Directory para utilizador {UserPrincipalName}. PedidoId={PedidoId}, ZinfId={ZinfId}",
+                    upn,
+                    pedidoId,
+                    zinfId.Value);
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(recipientEmail) || !recipientEmail.Contains('@'))
+            {
+                _logger.LogError(
+                    "A ignorar envio de novo pedido para utilizador sem email válido: {UserPrincipalName}. PedidoId={PedidoId}, ZinfId={ZinfId}",
+                    upn,
+                    pedidoId,
+                    zinfId.Value);
+                continue;
+            }
+
+            try
+            {
+                await _requestNotificationEmailService.SendEmailAsync(
+                    recipientEmail,
+                    $"Novo pedido recebido ({pedidoPublicId})",
+                    body,
+                    isHtml: true,
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Falha ao enviar email de novo pedido para {RecipientEmail}. PedidoId={PedidoId}, ZinfId={ZinfId}",
+                    recipientEmail,
+                    pedidoId,
+                    zinfId.Value);
+            }
+        }
+    }
+
     private static string? ExtractInitialState(string workflowJson)
     {
         if (string.IsNullOrWhiteSpace(workflowJson))
@@ -271,5 +382,17 @@ public sealed class PedidosBensController : Controller
         }
 
         return number;
+    }
+
+    private string ResolveChangedBy(string? fallbackEmail)
+    {
+        return
+            User.FindFirstValue("preferred_username") ??
+            User.FindFirstValue("upn") ??
+            User.FindFirstValue(ClaimTypes.Upn) ??
+            User.FindFirstValue(ClaimTypes.Email) ??
+            User.Identity?.Name ??
+            fallbackEmail ??
+            "Sistema";
     }
 }

@@ -1,0 +1,123 @@
+@model REA.Emergencia.Web.Models.ZinfInstituicoesViewModel
+
+@{
+    ViewData["Title"] = "Instituições por ZINF";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Instituições da ZINF: @Model.ZinfNome</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Voltar às ZINFs</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="h5">Utilizadores atribuídos</h2>
+        @if (!Model.AssignedUsers.Any())
+        {
+            <p class="text-muted mb-0">Sem utilizadores atribuídos.</p>
+        }
+        else
+        {
+            <ul class="mb-0">
+                @foreach (var user in Model.AssignedUsers)
+                {
+                    <li>@user</li>
+                }
+            </ul>
+        }
+    </div>
+</div>
+
+<form method="get" class="row g-3 align-items-end mb-3">
+    <div class="col-md-3">
+        <label for="codigoEA" class="form-label">Código EA</label>
+        <input id="codigoEA" name="codigoEA" value="@Model.CodigoEA" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label for="nome" class="form-label">Nome</label>
+        <input id="nome" name="nome" value="@Model.Nome" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label for="distrito" class="form-label">Distrito</label>
+        <select asp-for="Distrito" id="distrito" class="form-select" asp-items="Model.DistritoOptions">
+            <option value="">Todos</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="concelho" class="form-label">Concelho</label>
+        <input id="concelho" name="concelho" value="@Model.Concelho" class="form-control" />
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Instituicoes" asp-route-id="@Model.ZinfId" class="btn btn-outline-secondary">Limpar</a>
+    </div>
+</form>
+
+<p class="text-muted">
+    A mostrar @Model.StartItem - @Model.EndItem de @Model.TotalItems instituições.
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Código EA</th>
+            <th>Nome</th>
+            <th>Distrito</th>
+            <th>Concelho</th>
+            <th>Pessoa de contacto</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Instituicoes.Any())
+        {
+            <tr>
+                <td colspan="6">Sem instituições associadas a esta ZINF.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var instituicao in Model.Instituicoes)
+            {
+                <tr>
+                    <td>@instituicao.CodigoEA</td>
+                    <td>@instituicao.Nome</td>
+                    <td>@(instituicao.Distrito ?? "-")</td>
+                    <td>@(instituicao.Concelho ?? "-")</td>
+                    <td>@(instituicao.PessoaContacto ?? "-")</td>
+                    <td>@(instituicao.Email1 ?? "-")</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<nav aria-label="Paginação de instituições da ZINF">
+    <ul class="pagination">
+        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+            <a class="page-link"
+               asp-action="Instituicoes"
+               asp-route-id="@Model.ZinfId"
+               asp-route-page="@(Model.Page - 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-codigoEA="@Model.CodigoEA"
+               asp-route-nome="@Model.Nome"
+               asp-route-distrito="@Model.Distrito"
+               asp-route-concelho="@Model.Concelho">Anterior</a>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">Página @Model.Page de @Model.TotalPages</span>
+        </li>
+        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+            <a class="page-link"
+               asp-action="Instituicoes"
+               asp-route-id="@Model.ZinfId"
+               asp-route-page="@(Model.Page + 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-codigoEA="@Model.CodigoEA"
+               asp-route-nome="@Model.Nome"
+               asp-route-distrito="@Model.Distrito"
+               asp-route-concelho="@Model.Concelho">Próxima</a>
+        </li>
+    </ul>
+</nav>
